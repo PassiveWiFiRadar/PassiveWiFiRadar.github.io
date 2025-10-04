@@ -42,6 +42,26 @@ color: #FF9900;
 
 Please see <a href="http://vision.cs.utexas.edu/projects/adapted_attributes/">this</a> for an example of how to lay out the various details of your project. You may need to provide more details than this, because you will not be submitting an associated paper to accompany the webpage. So the page should be self-contained.
 
+<h1>PROJECT PROPOSAL</h1>
+<h2>Motivation</h2>
+<br><br>
+  Computer vision techniques are not limited to processing camera data, nor is camera deployment always feasible in areas where privacy is of concern, or when opaque objects may block views. It is implied but not often discussed in computer vision courses that image processing techniques may be applied to any 2D signal representation, including spectrograms from wireless signals. By representing signals as images, we can process them with CNNs and similar computer vision techniques similarly to images from a camera. The field of wireless sensing is a promising approach to detecting various features about the environment in situations where cameras may not be appropriate, such as in private homes.
+<br><br>
+  <h2>Problem Statement</h2>
+<br><br>
+  The goal of this project is to explore using WiFi as a unique form of computer vision by exploiting the way the physical environment interacts with wireless signals. Specifically, we intend to use Doppler spectrograms from a passive WiFi radar (PWR) dataset for human activity recognition (HAR) by processing the data as images. 
+<br><br>
+  <h2>Approach and Experiments</h2>
+We plan to train deep learning models to perform visual classification of various human activities based on Doppler spectrograms, such as walking, running, standing, and sitting. The dataset we intend to use is a subset of the OperaNET dataset [1]. This data is presented in .mat files which we will load into Google CoLab for preprocessing. Since three passive receivers were used in the data collection process, we effectively have three-channel images to work with.
+<br><br>
+  We hope to reproduce the PWR-related subset of findings from the related research paper, as well as to demonstrate that computer vision tools can generalize to non-camera images. Another team aims to work in parallel with us by using WiFi channel state information (CSI) from the same dataset, which will allow us to compare results in a complementary way while having distinct deliverables. We plan to use open-source libraries such as OpenCV, Tensorflow, and Pytorch. To verify the performance of our model, we intend to use industry-standard metrics such as confusion matrices and F1 score. 
+<br><br>
+  <h2>References</h2>
+  [1] M. J. Bocus, “A Comprehensive Multimodal Activity Recognition Dataset Acquired from Radio Frequency and Vision-Based Sensors”. figshare, 01-Aug-2022, doi: 10.6084/m9.figshare.c.5551209.v1.
+
+<br><br>
+
+  
 <!-- Goal -->
 <h3>Abstract</h3>
 
@@ -60,12 +80,6 @@ A figure that conveys the main idea behind the project or the main application b
 <!-- Introduction -->
 <h3>Introduction</h3>
 Motivation behind the problem you are solving, what applications it has, any brief background on the particular domain you are working in (if not regular RBG photographs), etc. If you are using a new way to solve an existing problem, briefly mention and describe the existing approaches and tell us how your approach is new.
-WiFi Passive Radar
-Problem Statement
-The goal of this project is to explore using WiFi as a unique form of computer vision by exploiting the way the physical environment interacts with wireless signals. Specifically, we intend to use passive WiFi radar (PWR) for human activity recognition (HAR) by processing the data as images—likely spectrograms. 
-Approach and Experiments
-We plan to train deep learning models similar to those commonly used in computer vision to distinguish between various human activities based on Doppler spectrograms. The dataset we intend to use is a subset of the OperaNET dataset. At minimum, we hope to reproduce the PWR-related subset of findings from the related research paper. Another team aims to work in parallel with us by using WiFi channel state information (CSI) from the same dataset to achieve the same result, which will allow us to compare results in a complementary way. We plan to use open source libraries such as OpenCV, Tensorflow, and Pytorch. To verify the performance of our model, we intend to use industry-standard metrics such as confusion matrices and F1 score. 
-
 
 <br><br>
 <!-- Approach -->
