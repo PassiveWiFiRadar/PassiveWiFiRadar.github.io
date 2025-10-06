@@ -42,19 +42,42 @@ color: #FF9900;
 
 Please see <a href="http://vision.cs.utexas.edu/projects/adapted_attributes/">this</a> for an example of how to lay out the various details of your project. You may need to provide more details than this, because you will not be submitting an associated paper to accompany the webpage. So the page should be self-contained.
 
-<h1>PROJECT PROPOSAL</h1>
-<h2>Motivation</h2>
-<br><br>
-  Computer vision techniques are not limited to processing camera data, nor is camera deployment always feasible in areas where privacy is of concern, or when opaque objects may block views. It is implied but not often discussed in computer vision courses that image processing techniques may be applied to any 2D signal representation, including spectrograms from wireless signals. By representing signals as images, we can process them with CNNs and similar computer vision techniques similarly to images from a camera. The field of wireless sensing is a promising approach to detecting various features about the environment in situations where cameras may not be appropriate, such as in private homes.
-<br><br>
-  <h2>Problem Statement</h2>
-<br><br>
-  The goal of this project is to explore using WiFi as a unique form of computer vision by exploiting the way the physical environment interacts with wireless signals. Specifically, we intend to use Doppler spectrograms from a passive WiFi radar (PWR) dataset for human activity recognition (HAR) by processing the data as images. 
-<br><br>
-  <h2>Approach and Experiments</h2>
-We plan to train deep learning models to perform visual classification of various human activities based on Doppler spectrograms, such as walking, running, standing, and sitting. The dataset we intend to use is a subset of the OperaNET dataset [1]. This data is presented in .mat files which we will load into Google CoLab for preprocessing. Since three passive receivers were used in the data collection process, we effectively have three-channel images to work with.
-<br><br>
-  We hope to reproduce the PWR-related subset of findings from the related research paper, as well as to demonstrate that computer vision tools can generalize to non-camera images. Another team aims to work in parallel with us by using WiFi channel state information (CSI) from the same dataset, which will allow us to compare results in a complementary way while having distinct deliverables. We plan to use open-source libraries such as OpenCV, Tensorflow, and Pytorch. To verify the performance of our model, we intend to use industry-standard metrics such as confusion matrices and F1 score. 
+<h1>PROJECT PROPOSAL</h1> 
+  <h2>Motivation</h2>
+Computer vision techniques are not limited to processing camera data, nor is camera deployment always feasible in areas where privacy is a concern or where opaque objects may block views. Although it is often implied but not explicitly discussed in computer vision courses, image processing techniques can be applied to any two-dimensional signal representation, including spectrograms derived from wireless signals.
+
+By representing wireless signals as images, we can leverage convolutional neural networks (CNNs) and other computer vision architectures to analyze them in a similar way to visual data. The field of wireless sensing offers a promising alternative for detecting environmental and human features in contexts where camera-based systems are unsuitable, such as private homes or restricted spaces.
+
+<br> <h2>Problem Statement</h2>
+
+The goal of this project is to explore WiFi as a novel form of computer vision by utilizing how wireless signals interact with the physical environment. Specifically, we aim to use Doppler spectrograms from a passive WiFi radar (PWR) dataset for human activity recognition (HAR), treating these spectrograms as image-like data suitable for visual classification.
+
+<br> <h2>Approach</h2>
+
+We plan to train deep learning models to classify human activities—such as walking, running, standing, and sitting—using Doppler spectrograms from a subset of the OperaNET dataset [1]. The dataset is provided in .mat format and will be loaded into Google Colab for preprocessing and conversion into image tensors. Since three passive receivers were used during data collection, each sample effectively contains three Doppler spectrograms, which we will treat as three-channel image inputs.
+
+Our approach will begin with a baseline CNN implemented in PyTorch, followed by experiments with deeper or pretrained architectures to evaluate performance improvements. We will implement custom preprocessing and training pipelines while leveraging open-source libraries such as OpenCV, TensorFlow, and PyTorch.
+
+We aim to reproduce and extend the PWR-related findings reported in the OperaNET research paper, demonstrating that computer vision methods can generalize effectively to non-camera-based image data. In parallel, another team will analyze WiFi Channel State Information (CSI) from the same dataset, allowing complementary comparisons and validation across modalities.
+
+<br> <h2>Experiments</h2>
+
+We will conduct a series of experiments to evaluate model performance and investigate the effects of data representation, model architecture, and training strategy on classification accuracy.
+
+<b>1. Baseline Model:</b>
+Train a simple CNN on Doppler spectrograms to establish a performance benchmark for human activity recognition. This model will serve as the reference point for all further experiments.
+
+<b>2. Model Complexity Study:</b>
+Compare architectures of varying depth and complexity (e.g., shallow versus deeper CNNs) to analyze trade-offs between accuracy, training stability, and computational cost.
+
+<b>3. Comparison with CSI-Based Work:</b>
+Collaborate with the CSI-focused team to compare results and highlight complementary strengths between Doppler-based and CSI-based human activity recognition.
+
+<br>
+
+<b>Evaluation Metrics and Success Criteria:</b>
+Model performance will be assessed using accuracy, confusion matrices, and F1 score. Success will be defined as achieving classification accuracy and F1 scores significantly above random baseline (targeting ≥70%), reproducing trends reported in prior PWR studies, and demonstrating that CNN-based visual analysis of Doppler spectrograms yields meaningful, interpretable results across multiple activities.
+
 <br><br>
   <h2>References</h2>
   [1] M. J. Bocus, “A Comprehensive Multimodal Activity Recognition Dataset Acquired from Radio Frequency and Vision-Based Sensors”. figshare, 01-Aug-2022, doi: 10.6084/m9.figshare.c.5551209.v1.
