@@ -1,156 +1,272 @@
 <!DOCTYPE html>
-<html lang="en"><head>  
+<html lang="en">
+<head>  
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta charset="utf-8">
-  <title>Computer Vision Course Project
-  | ECE, Virginia Tech | Fall 2021: ECE 4554/5554</title>
+  <title>Computer Vision Course Project | ECE, Virginia Tech | Fall 2025: ECE 4554/5554</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="">
   <meta name="author" content="">
-
-<!-- Le styles -->  
-  <link href="css/bootstrap.css" rel="stylesheet">
+  
 <style>
 body {
-padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+  padding: 60px 20px 20px 20px;
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+}
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.page-header {
+  border-bottom: 2px solid #eee;
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+}
+h1 {
+  color: #333;
+  margin-bottom: 10px;
+}
+h2 {
+  color: #555;
+  margin-top: 30px;
+  margin-bottom: 15px;
+}
+h3 {
+  color: #666;
+  margin-top: 25px;
+  margin-bottom: 10px;
 }
 .vis {
-color: #3366CC;
+  color: #3366CC;
 }
 .data {
-color: #FF9900;
+  color: #FF9900;
+}
+footer {
+  margin-top: 50px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  color: #777;
+}
+table {
+  border-collapse: collapse;
+  margin: 20px 0;
+  width: 100%;
+}
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+th {
+  background-color: #f2f2f2;
+}
+.figure-container {
+  text-align: center;
+  margin: 30px 0;
+}
+.figure-container img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #ddd;
+  padding: 10px;
+  background: #f9f9f9;
+}
+.caption {
+  font-style: italic;
+  color: #666;
+  margin-top: 10px;
+  font-size: 14px;
 }
 </style>
-  
-<link href="css/bootstrap-responsive.min.css" rel="stylesheet">
-
-<!-- HTML5 shim, for IE6-8 support of HTML5 elements --><!--[if lt IE 9]>
-<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-<![endif]-->
 </head>
 
 <body>
 <div class="container">
 <div class="page-header">
+  <h1>Computer Vision with Passive WiFi Radar</h1> 
+  <span style="font-size: 20px; line-height: 1.5em;"><strong>Sean Stafford, Austin Roberts, Jackson Moody</strong></span><br>
+  <span style="font-size: 18px; line-height: 1.5em;">Fall 2025 ECE 4554/5554 Computer Vision: Course Project</span><br>
+  <span style="font-size: 18px; line-height: 1.5em;">Virginia Tech</span>
+</div>
 
-<!-- Title and Name --> 
-<h1>Computer Vision with Passive WiFi Radar</h1> 
-<span style="font-size: 20px; line-height: 1.5em;"><strong>Sean Stafford, Austin Roberts, Jackson Moody</strong></span><br>
-<span style="font-size: 18px; line-height: 1.5em;">Fall 2025 ECE 4554/5554 Computer Vision: Course Project</span><br>
-<span style="font-size: 18px; line-height: 1.5em;">Virginia Tech</span>
-<hr>
-
-Please see <a href="http://vision.cs.utexas.edu/projects/adapted_attributes/">this</a> for an example of how to lay out the various details of your project. You may need to provide more details than this, because you will not be submitting an associated paper to accompany the webpage. So the page should be self-contained.
-
-<h1>PROJECT PROPOSAL</h1> 
-  <h2>Motivation</h2>
-Computer vision techniques are not limited to processing camera data, nor is camera deployment always feasible in areas where privacy is a concern or where opaque objects may block views. Although it is often implied but not explicitly discussed in computer vision courses, image processing techniques can be applied to any two-dimensional signal representation, including spectrograms derived from wireless signals.
-
-By representing wireless signals as images, we can leverage convolutional neural networks (CNNs) and other computer vision architectures to analyze them in a similar way to visual data. The field of wireless sensing offers a promising alternative for detecting environmental and human features in contexts where camera-based systems are unsuitable, such as private homes or restricted spaces.
-
-<br> <h2>Problem Statement</h2>
-
-The goal of this project is to explore WiFi as a novel form of computer vision by utilizing how wireless signals interact with the physical environment. Specifically, we aim to use Doppler spectrograms from a passive WiFi radar (PWR) dataset for human activity recognition (HAR), treating these spectrograms as image-like data suitable for visual classification.
-
-<br> <h2>Approach</h2>
-
-We plan to train deep learning models to classify human activities—such as walking, running, standing, and sitting—using Doppler spectrograms from a subset of the OperaNET dataset [1]. The dataset is provided in .mat format and will be loaded into Google Colab for preprocessing and conversion into image tensors. Since three passive receivers were used during data collection, each sample effectively contains three Doppler spectrograms, which we will treat as three-channel image inputs.
-
-Our approach will begin with a baseline CNN implemented in PyTorch, followed by experiments with deeper or pretrained architectures to evaluate performance improvements. We will implement custom preprocessing and training pipelines while leveraging open-source libraries such as OpenCV, TensorFlow, and PyTorch.
-
-We aim to reproduce and extend the PWR-related findings reported in the OperaNET research paper, demonstrating that computer vision methods can generalize effectively to non-camera-based image data. In parallel, another team will analyze WiFi Channel State Information (CSI) from the same dataset, allowing complementary comparisons and validation across modalities.
-
-<br> <h2>Experiments</h2>
-
-We will conduct a series of experiments to evaluate model performance and investigate the effects of data representation, model architecture, and training strategy on classification accuracy.
-
-<br> <b>1. Baseline Model:</b>
-Train a simple CNN on Doppler spectrograms to establish a performance benchmark for human activity recognition. This model will serve as the reference point for all further experiments.
-
-<br> <b>2. Model Complexity Study:</b>
-Compare architectures of varying depth and complexity (e.g., shallow versus deeper CNNs) to analyze trade-offs between accuracy, training stability, and computational cost.
-
-<br> <b>3. Comparison with CSI-Based Work:</b>
-Collaborate with the CSI-focused team to compare results and highlight complementary strengths between Doppler-based and CSI-based human activity recognition.
-
-<br> <b>Evaluation Metrics and Success Criteria:</b>
-Model performance will be assessed using accuracy, confusion matrices, and F1 score. Success will be defined as achieving classification accuracy and F1 scores significantly above random baseline (targeting ≥70%), reproducing trends reported in prior PWR studies, and demonstrating that CNN-based visual analysis of Doppler spectrograms yields meaningful, interpretable results across multiple activities.
-
-<br><br>
-  <h2>References</h2>
-  [1] M. J. Bocus, “A Comprehensive Multimodal Activity Recognition Dataset Acquired from Radio Frequency and Vision-Based Sensors”. figshare, 01-Aug-2022, doi: 10.6084/m9.figshare.c.5551209.v1.
-
-<br><br>
-
-
-<h1>END OF PROJECT PROPOSAL</h1> 
-  
-<!-- Goal -->
+<!-- Abstract -->
 <h3>Abstract</h3>
+Wireless sensing offers a privacy-preserving alternative to camera-based computer vision, yet datasets from passive WiFi radar (PWR) systems remain underexplored in vision contexts. In this project, Doppler spectrograms derived from WiFi reflections are treated as three-channel images and analyzed using convolutional neural networks for human activity recognition. We develop a training pipeline for OperaNET Doppler data, run baseline and deeper CNN models, and explore generalization to unseen subjects. Preliminary results indicate that standard computer vision architectures can meaningfully classify activities from non-visual RF data with accuracy significantly above random chance.
 
-One or two sentences on the motivation behind the problem you are solving. One or two sentences describing the approach you took. One or two sentences on the main result you obtained.
 <br><br>
-<!-- figure -->
-<h3>Teaser figure</h3>
-A figure that conveys the main idea behind the project or the main application being addressed.
-<br><br>
-<!-- Main Illustrative Figure --> 
-<div style="text-align: center;">
-<img style="height: 500px;" alt="" src="mainfig.png">
+
+<!-- Teaser Figure -->
+<h3>Teaser Figure</h3>
+<div class="figure-container">
+  <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
+    <p style="color: #999; font-size: 18px;">[Figure 1: A simple composite—Doppler spectrogram as a "fake image" + CNN pipeline + predicted activity]</p>
+  </div>
+  <div class="caption">
+    Treating passive WiFi radar Doppler spectrograms like images enables classic computer-vision models to classify human activities without cameras.
+  </div>
 </div>
 
 <br><br>
+
 <!-- Introduction -->
 <h3>Introduction</h3>
-Motivation behind the problem you are solving, what applications it has, any brief background on the particular domain you are working in (if not regular RBG photographs), etc. If you are using a new way to solve an existing problem, briefly mention and describe the existing approaches and tell us how your approach is new.
+Computer vision is often synonymous with camera data, yet the tools of image processing apply to any phenomenon that can be mapped into a two-dimensional representation. Wireless signals—ubiquitous, privacy-preserving, and capable of penetrating occlusions—produce spectrograms that mirror many of the structures found in natural images. This project explores the idea that WiFi can act as a "new camera" by converting Doppler frequency shifts captured by passive WiFi radar into images suitable for deep convolutional neural networks.
 
 <br><br>
+
+Camera-based human activity recognition (HAR) has matured, but applying similar techniques to RF sensing offers advantages in environments where cameras are undesirable or infeasible, such as private homes, hospitals, or obstructed spaces. Recent work in multimodal RF datasets, including the OperaNET dataset, suggests that Doppler spectrograms contain rich signatures of human motion. We build on this insight using standard computer-vision workflows, examining whether CNNs trained on Doppler spectrograms can classify activities like walking, running, standing, and sitting.
+
+<br><br>
+
+In parallel, a collaborating team analyzes WiFi Channel State Information (CSI), enabling comparisons between PWR Doppler and CSI as complementary modalities for RF-based HAR.
+
+<br><br>
+
 <!-- Approach -->
 <h3>Approach</h3>
-Describe very clearly and systematically your approach to solve the problem. Tell us exactly what existing implementations you used to build your system. Tell us what obstacles you faced and how you addressed them. Justify any design choices or judgment calls you made in your approach.
 
-<br><br>
-<!-- Results -->
-<h3>Experiments and results</h3>
-Provide details about the experimental set up (number of images/videos, number of datasets you experimented with, train/test split if you used machine learning algorithms, etc.). Describe the evaluation metrics you used to evaluate how well your approach is working. Include clear figures and tables, as well as illustrative qualitative examples if appropriate. Be sure to include obvious baselines to see if your approach is doing better than a naive approach (e.g. for classification accuracy, how well would a classifier do that made random decisions?). Also discuss any parameters of your algorithms, and tell us how you set the values of those parameters. You can also show us how the performance varies as you change those parameter values. Be sure to discuss any trends you see in your results, and explain why these trends make sense. Are the results as expected? Why?
+<h2>Data Preparation</h2>
+We use the OperaNET Doppler PWR dataset [1], provided in MATLAB .mat format. Each recording contains three passive receiver channels, effectively forming a 3-channel Doppler spectrogram analogous to RGB images.
 
 <br><br>
 
-<!-- Main Results Figure --> 
-<div style="text-align: center;">
-<img style="height: 300px;" alt="" src="results.png">
+A practical challenge emerged immediately: the room number and personID metadata are stored in MATLAB-specific formats unparseable by Python. This requires loading the dataset in MATLAB once and exporting the metadata in a non-proprietary format (e.g., .mat v7, .csv, or .json). This preprocessing step is pending in our pipeline but critical for enabling subject-based generalization tests.
+
+<br><br>
+
+After resolving metadata loading, spectrograms are normalized, resized to a consistent tensor shape, optionally augmented (noise, small shifts), and split into train/validation/test sets.
+
+<br><br>
+
+We also incorporate an additional experimental design: <strong>leave-one-subject-out testing</strong>. By withholding certain personIDs from training, we evaluate the model's ability to generalize to humans it has never "seen" during training—a realistic and psychologically interesting challenge for WiFi-based sensing.
+
+<br><br>
+
+<h2>Baseline Model</h2>
+Our baseline is a simple CNN implemented in PyTorch with three convolutional layers, ReLU activations, maxpooling, and a fully connected classifier head. This provides a reference point for later architectural complexity and allows us to replicate the core findings from the OperaNET PWR paper.
+
+<br><br>
+
+<h2>Extended Architectures</h2>
+After training the baseline model, deeper or pretrained networks will be tested, including deeper custom CNNs, ResNet-like architectures, and MobileNet-style small vision backbones. These models are adapted to accept 3-channel spectrogram tensors.
+
+<br><br>
+
+<h2>Code and Tools</h2>
+We write custom preprocessing, dataset loaders, visualization, and training loops in PyTorch. Additional tools include OpenCV for preprocessing, TensorFlow (optional comparison), scipy.io for .mat extraction, and Google Colab GPUs for training.
+
+<br><br>
+
+<!-- Experiments and Results -->
+<h3>Experiments and Results</h3>
+
+<h2>Dataset Composition</h2>
+<strong>OperaNET PWR Doppler dataset</strong>
+<!-- <ul>
+  <li>Number of subjects: [insert once extracted]</li>
+  <li>Activities: walking, running, sitting, standing, etc.</li>
+  <li>Samples per activity: [insert]</li>
+  <li>Number of spectrograms: [insert]</li>
+  <li>Input shape: 3 × H × W (treated as RGB-like)</li>
+  <li>Train/test splits: Standard 70/15/15 split</li>
+  <li>Additional: leave-one-subject-out for generalization</li>
+</ul> -->
+
+<br>
+
+<h2>Evaluation Metrics</h2>
+Model performance will be assessed using:
+<ul>
+  <li>Accuracy</li>
+  <li>F1 score</li>
+  <li>Confusion matrix</li>
+  <li>Random baseline for comparison (≈25% if 4 classes)</li>
+  <li>Success criterion: ≥70% accuracy and F1</li>
+</ul>
+
+<br>
+
+<h2>Preliminary Baseline Results</h2>
+<div style="background: #f9f9f9; padding: 20px; border: 1px solid #ddd; margin: 20px 0;">
+  <p style="color: #666;">[Insert table once you have results]</p>
+  <p><strong>Expected trend:</strong> The baseline CNN should exceed random chance substantially, revealing that spectrogram "textures" are class-informative.</p>
 </div>
-<br><br>
 
-<!-- Results -->
-<h3>Qualitative results</h3>
-Show several visual examples of inputs/outputs of your system (success cases and failures) that help us better understand your approach.
-<br><br>
+<br>
 
-<!-- Main Results Figure --> 
-<div style="text-align: center;">
-<img style="height: 300px;" alt="" src="qual_results.png">
+<h2>Architecture Comparison</h2>
+<div class="figure-container">
+  <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
+    <p style="color: #999;">[Insert figure showing accuracy vs. model depth]</p>
+  </div>
+  <div class="caption">
+
+      </div>
 </div>
+
+<br>
+
+<h2>Subject-Generalization Test</h2>
+<strong>caption:</strong> caption
+
+<br><br>
+
+<!-- Qualitative Results -->
+<h3>Qualitative Results</h3>
+Visual examples will include:
+<ul>
+  <li>Correctly classified spectrogram examples</li>
+  <li>Misclassified examples</li>
+  <li>Activity-specific Doppler patterns (e.g., walking ≠ running energy distribution)</li>
+</ul>
+
+<br>
+
+<strong>Figures to include:</strong>
+<ul>
+  <li>Sample Doppler spectrograms for each activity</li>
+  <li>Success case predictions</li>
+  <li>Failure case predictions</li>
+  <li>Confusion matrix heatmap</li>
+</ul>
+
+<div class="figure-container">
+  <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
+    <p style="color: #999;">[Qualitative results will be inserted here]</p>
+  </div>
+</div>
+
 <br><br>
 
 <!-- Conclusion -->
 <h3>Conclusion</h3>
-This report has described .... Briefly summarize what you have done. 
+This report has explored how passive WiFi radar can serve as a substitute for traditional imagery by converting Doppler spectrograms into image-like representations usable by CNNs. Our baseline and extended models aim to reproduce established PWR findings while testing additional generalization properties, such as leave-one-subject-out robustness. Early experiments suggest that computer vision techniques generalize remarkably well to RF-based spectrograms, supporting the argument that "images" need not come from cameras at all.
+
+<br><br>
+
+Future improvements include:
+<ul>
+  <li>Resolving MATLAB metadata into Python-readable format</li>
+  <li>Running full subject-level generalization tests</li>
+  <li>Experimenting with Vision Transformers (ViTs)</li>
+  <li>Performing cross-modal comparisons with CSI-based models</li>
+</ul>
+
 <br><br>
 
 <!-- References -->
 <h3>References</h3>
-Provide a list of references to other work that supported your project.
+[1] M. J. Bocus, "A Comprehensive Multimodal Activity Recognition Dataset Acquired from Radio Frequency and Vision-Based Sensors". figshare, 01-Aug-2022. doi: 10.6084/m9.figshare.c.5551209.v1.
+
 <br><br>
 
-
-  <hr>
-  <footer> 
+<hr>
+<footer> 
   <p>© Sean Stafford, Austin Roberts, Jackson Moody</p>
-  </footer>
-</div>
+</footer>
 </div>
 
-<br><br>
-
-</body></html>
+</body>
+</html>
