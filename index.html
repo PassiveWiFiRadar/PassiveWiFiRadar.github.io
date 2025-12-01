@@ -128,9 +128,15 @@ Camera-based human activity recognition (HAR) has matured, but applying similar 
 <h3>Approach</h3>
 
 <h2>Data Preparation</h2>
-We use the OperaNET Doppler PWR dataset [1], provided in MATLAB .mat format. Each recording contains three passive receiver channels, effectively forming a 3-channel Doppler spectrogram analogous to RGB images.
+The dataset used in this experiment is OPERAnet [1], a multimodal dataset for HAR. Although the dataset includes WiFi CSI, Ultra-Wideband, and Microsoft X-box Kinect sensor data, our interest lies in the passive WiFi radar data subset. The hardware setup employed in [1] uses a USRP-2945 as a four-channel passive receiver with directional antennas. The first channel is used as the reference channel, recording the signal of opportunity; the remaining three are surveillance channels. The study used an Intel NUC device to create the signal of opportunity, although any stationary WiFi transmitter could be used. Refer to [1] for details regarding room layout and antenna placement.
 
 <br><br>
+  Significant preprocessing was performed on the raw PWR data prior to the dataset publication. The reference and surveillance signals were correlated to obtain Doppler frequency-shift information with 200 frequency bins of resolution, formatted as a 3 x 200 set of values at each sampling time instant [1]. The recording sample rate was 10 Hz. They report that a CLEAN suppression algorithm was used to reduce direct signal interference.
+  <br><br>
+The authors chose to exclude relative range data from the dataset due to the limited 40-MHz WiFi signal bandwidth of the 5 GHz band, which provides only 3.75 meters of range resolution [1]. The 5 GHz band was chosen over the 2.4 GHz band, whose 20 MHz bandwidth would have halved the already-limited resolution. It is worth noting that the latest WiFi (802.11ax) standard is capable of up to 160 MHz channel bandwidth, providing a theoretical 0.938 meters of range resolution for potential future investigation.
+
+  <br><br>
+  A total of 38 separate experiment files containing the PWR data were provided in .mat format, including the activity labels, experiment number, person ID and room number. 
 
 A practical challenge emerged immediately: the room number and personID metadata are stored in MATLAB-specific formats unparseable by Python. This requires loading the dataset in MATLAB once and exporting the metadata in a non-proprietary format (e.g., .mat v7, .csv, or .json). This preprocessing step is pending in our pipeline but critical for enabling subject-based generalization tests.
 
