@@ -295,14 +295,181 @@ We write custom preprocessing, dataset loaders, visualization, and training loop
 <br>
 
 <h2>Evaluation Metrics</h2>
-Model performance will be assessed using:
-<ul>
-  <li>Accuracy</li>
-  <li>F1 score</li>
-  <li>Confusion matrix</li>
-  <li>Random baseline for comparison (≈25% if 4 classes)</li>
-  <li>Success criterion: ≥70% accuracy and F1</li>
-</ul>
+<div class="section">
+        <h2>Evaluation Metrics</h2>
+        <div class="intro-text">
+            Model performance is assessed using multiple complementary metrics that provide different perspectives on classification quality. Our evaluation strategy includes standard classification metrics, confusion matrix analysis, and a novel confidence-based evaluation approach tailored to the characteristics of WiFi-based activity recognition.
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Primary Metrics</h3>
+
+        <div class="metric-card">
+            <h4>1. Classification Accuracy</h4>
+            <div class="formula">
+                Accuracy = (Number of Correct Predictions) / (Total Number of Predictions)
+            </div>
+            <div class="explanation">
+                <strong>Purpose:</strong> Overall measure of how often the model correctly identifies activities across all seven classes.
+            </div>
+            <ul>
+                <li><strong>Computed separately</strong> for training, validation, and test sets
+                    <div class="explanation">Training accuracy shows how well the model fits the training data. Validation accuracy guides hyperparameter selection. Test accuracy provides the final unbiased performance estimate.</div>
+                </li>
+                <li><strong>Baseline comparison:</strong> Random guessing baseline = <span class="highlight">14.3%</span> (1/7 classes)
+                    <div class="explanation">Any meaningful model must substantially exceed this threshold. We target ≥70% accuracy to demonstrate practical utility.</div>
+                </li>
+                <li><strong>Interpretation considerations:</strong>
+                    <ul class="nested-list">
+                        <li>High training accuracy + low test accuracy → overfitting</li>
+                        <li>Similar training and test accuracy → good generalization</li>
+                        <li>Low accuracy on both → underfitting or insufficient model capacity</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="metric-card">
+            <h4>2. Confusion Matrix</h4>
+            <div class="explanation">
+                <strong>Purpose:</strong> Provides detailed per-class performance breakdown, revealing which activities are easily distinguished and which are commonly confused.
+            </div>
+            <ul>
+                <li><strong>Structure:</strong> 7×7 matrix where rows represent true labels and columns represent predicted labels
+                    <div class="explanation">Diagonal elements show correct classifications. Off-diagonal elements reveal misclassification patterns.</div>
+                </li>
+                <li><strong>Reveals critical patterns:</strong>
+                    <ul class="nested-list">
+                        <li><strong>Transitional activity confusion:</strong> "sit" vs "stand" vs "standfromlie" may show cross-confusion due to similar Doppler signatures during brief movements</li>
+                        <li><strong>Motion vs stillness:</strong> "walk" and "bodyrotate" should be clearly separated from "noactivity"</li>
+                        <li><strong>Class-specific performance:</strong> Some activities may have consistently high recall while others struggle</li>
+                    </ul>
+                </li>
+                <li><strong>Analysis approach:</strong>
+                    <ul class="nested-list">
+                        <li>Examine diagonal strength (darker = better per-class performance)</li>
+                        <li>Identify systematic confusion patterns</li>
+                        <li>Check if rare classes (sit: 265 samples, stand: 299 samples) suffer from data scarcity</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <div class="warning-box">
+                <strong>Expected Confusion Patterns:</strong> Activities with similar motion profiles (e.g., "sit" and "stand" both involve vertical torso movement) may show higher confusion rates. This is physically meaningful rather than a model failure.
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <h4>3. Per-Class Metrics (Derived from Confusion Matrix)</h4>
+            
+            <div class="formula">
+                Precision = True Positives / (True Positives + False Positives)
+            </div>
+            <div class="explanation">
+                <strong>Interpretation:</strong> When the model predicts class X, how often is it correct? High precision means few false alarms for that activity.
+            </div>
+
+            <div class="formula" style="margin-top: 15px;">
+                Recall = True Positives / (True Positives + False Negatives)
+            </div>
+            <div class="explanation">
+                <strong>Interpretation:</strong> Of all actual instances of class X, how many did the model detect? High recall means the model rarely misses that activity.
+            </div>
+
+            <div class="formula" style="margin-top: 15px;">
+                F1-Score = 2 × (Precision × Recall) / (Precision + Recall)
+            </div>
+            <div class="explanation">
+                <strong>Interpretation:</strong> Harmonic mean balancing precision and recall. Particularly useful for imbalanced classes where accuracy alone can be misleading.
+            </div>
+
+            <ul>
+                <li><strong>Application to our dataset:</strong>
+                    <ul class="nested-list">
+                        <li>Classes with fewer samples (sit, stand) may show lower recall</li>
+                        <li>Common activities (walk, bodyrotate) should show balanced precision/recall</li>
+                        <li>F1-scores reveal which classes need more training data or architectural improvements</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Hyperparameter Optimization Metrics</h3>
+
+        <div class="metric-card">
+            <h4>6. Validation Accuracy During Grid Search</h4>
+            <ul>
+                <li><strong>Grid search parameters:</strong>
+                    <ul class="nested-list">
+                        <li>Learning rate: [1e-4, 3e-4, 1e-3]</li>
+                        <li>Weight decay: [0, 1e-4, 1e-3]</li>
+                        <li>Dropout: [0, 0.1, 0.3]</li>
+                        <li>Batch size: [32, 64, 128]</li>
+                        <li><strong>Total combinations:</strong> 81</li>
+                    </ul>
+                </li>
+                <li><strong>Selection criterion:</strong> Configuration achieving highest validation accuracy after 12 epochs
+                    <div class="explanation">Validation set is used exclusively for this selection to prevent test set leakage. Each configuration is trained from scratch to ensure fair comparison.</div>
+                </li>
+                <li><strong>Reported results:</strong> Best hyperparameters and corresponding validation/test performance
+                    <div class="explanation">This demonstrates the improvement gained through systematic hyperparameter optimization vs using default values.</div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Baseline Comparisons</h3>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Baseline</th>
+                    <th>Expected Performance</th>
+                    <th>Purpose</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Random Guessing</strong></td>
+                    <td>14.3% (1/7 classes)</td>
+                    <td>Absolute minimum performance threshold</td>
+                </tr>
+                <tr>
+                    <td><strong>Majority Class</strong></td>
+                    <td>~16.3% (always predict "bodyrotate", "liedown", "noactivity", "standfromlie", or "walk")</td>
+                    <td>Shows benefit of learning vs exploiting dataset bias (prevented by class balancing)</td>
+                </tr>
+                <tr>
+                    <td><strong>Shallow CNN (Baseline Model)</strong></td>
+                    <td>Target: ≥70%</td>
+                    <td>Demonstrates feasibility of CNN-based approach for RF spectrograms</td>
+                </tr>
+                <tr>
+                    <td><strong>Deeper Architectures (Future)</strong></td>
+                    <td>Expected: ≥75%</td>
+                    <td>Quantify benefit of architectural complexity</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Success Criteria</h3>
+        <div class="success-box">
+            <strong>Minimum Viable Performance:</strong>
+            <ul style="margin-top: 10px;">
+                <li>Test accuracy ≥ 70%</li>
+                <li>No single class with F1-score < 0.5</li>
+                <li>Training-test accuracy gap < 15% (acceptable generalization)</li>
+                <li>Validation accuracy guides hyperparameter selection effectively</li>
+            </ul>
+        </div>
+
+    </div>
 
 <br>
 
