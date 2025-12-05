@@ -179,7 +179,8 @@ Our baseline is a standard CNN implemented using PyTorch with four convolutional
   
   <br><br>
 
-<h3>Approach: MODIFIED model 1</h3>
+<h3>Approach: MODIFIED model 1 - Test On Never Before Seen Room</h3>
+ The network must learn spatial–temporal patterns from Doppler spectrogram windows regardless of which room they were recorded in. The generalization question is handled strictly in the data split—training on windows from some rooms and testing on an unseen room—not in the structure of the model itself. In other words, the architecture remains a 4-layer convolutional front-end followed by a dense classifier head with seven outputs, but the training distribution shifts to evaluate environmental robustness rather than requiring any redesign of the network.
   <h3>Approach: MODIFIED model 2</h3>
   
 A practical challenge emerged immediately: the room number and personID metadata are stored in MATLAB-specific formats that we were unable to parse in our Google CoLab environment. We used MATLAB to export the data in a non-proprietary format before proceeding with our CoLab data processing.
@@ -187,23 +188,6 @@ After resolving metadata loading, spectrograms are normalized, resized to a cons
 
 <br><br>
 
-We also incorporate an additional experimental design: <strong>leave-one-subject-out testing</strong>. By withholding certain personIDs from training, we evaluate the model's ability to generalize to humans it has never "seen" during training—a realistic and psychologically interesting challenge for WiFi-based sensing.
-
-<br><br>
-
-
-
-<br><br>
-
-<h2>Extended Architectures</h2>
-After training the baseline model, deeper or pretrained networks will be tested, including deeper custom CNNs, ResNet-like architectures, and MobileNet-style small vision backbones. These models are adapted to accept 3-channel spectrogram tensors.
-
-<br><br>
-
-<h2>Code and Tools</h2>
-We write custom preprocessing, dataset loaders, visualization, and training loops in PyTorch. Additional tools include OpenCV for preprocessing, TensorFlow (optional comparison), scipy.io for .mat extraction, and Google Colab GPUs for training.
-
-<br><br>
 
 <!-- Experiments and Results -->
 <h3>Experiments and Results</h3>
