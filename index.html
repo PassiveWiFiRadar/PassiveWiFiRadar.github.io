@@ -194,15 +194,126 @@ We write custom preprocessing, dataset loaders, visualization, and training loop
 
 <h2>Dataset Composition</h2>
 <strong>OperaNET PWR Doppler dataset</strong>
-<!-- <ul>
-  <li>Number of subjects: [insert once extracted]</li>
-  <li>Activities: walking, running, sitting, standing, etc.</li>
-  <li>Samples per activity: [insert]</li>
-  <li>Number of spectrograms: [insert]</li>
-  <li>Input shape: 3 × H × W (treated as RGB-like)</li>
-  <li>Train/test splits: Standard 70/15/15 split</li>
-  <li>Additional: leave-one-subject-out for generalization</li>
-</ul> -->
+<div class="section">
+        <h2>Dataset Composition and Preprocessing</h2>
+        <div class="intro-text">
+            The OperaNET PWR dataset required substantial preprocessing to address severe class imbalance and remove irrelevant activity categories. This section details the transformation from raw windowed spectrograms to a balanced, training-ready dataset.
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Initial Distribution (Before Balancing)</h3>
+        <ul>
+            <li><strong>Total samples:</strong> <span class="stat-box">23,916</span> windowed spectrograms
+                <div class="explanation">Each sample represents a 4-second window (40 time steps at 10 Hz) of three-channel Doppler spectrogram data</div>
+            </li>
+            
+            <li><span class="warning">Highly imbalanced</span> with "noactivity" dominating at <span class="highlight">13,867 samples (58%)</span>
+                <div class="explanation">The "noactivity" class represents steady-state periods when subjects are motionless between activities. This extreme imbalance occurred because subjects spent significant time stationary while the experimenters prepared for the next activity</div>
+            </li>
+            
+            <li>Activity sample counts ranged dramatically from <span class="highlight">162 samples</span> (6_persons_tag_leftarm) to <span class="highlight">3,537 samples</span> (walk)
+                <div class="explanation">This 22× difference between minimum and maximum class sizes would cause the model to be biased toward predicting overrepresented classes, particularly "noactivity" and "walk"</div>
+            </li>
+            
+            <li>Dataset contained <span class="warning">unwanted calibration and tagging activities</span>:
+                <ul class="nested-list">
+                    <li>1_persons_tag_leftarm through 6_persons_tag_leftarm (tagging sequences where experimenters identified subjects)</li>
+                    <li>Background_start (calibration measurements with no subjects present)</li>
+                </ul>
+                <div class="explanation">These classes represented experimental procedures rather than actual human activities of interest, and were removed entirely from the final dataset</div>
+            </li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h3>Final Balanced Distribution (After Preprocessing)</h3>
+        <ul>
+            <li><strong>Total samples:</strong> <span class="stat-box">3,064</span> windowed spectrograms
+                <div class="explanation">Reduced from 23,916 to 3,064 (87% reduction) by removing unwanted classes and applying class balancing. This ensures the model learns from class patterns rather than class frequencies</div>
+            </li>
+            
+            <li><span class="success">7 activity classes retained</span> representing meaningful human activities
+                <div class="explanation">These seven classes cover the core activities of interest for human activity recognition in indoor environments</div>
+            </li>
+            
+            <li><strong>Class distribution after balancing:</strong>
+                <ul class="nested-list">
+                    <li><strong>bodyrotate:</strong> <span class="stat-box">500 samples</span>
+                        <div class="explanation">Subject rotating their body in place (yaw rotation)</div>
+                    </li>
+                    <li><strong>liedown:</strong> <span class="stat-box">500 samples</span>
+                        <div class="explanation">Transition from standing or sitting to lying horizontal</div>
+                    </li>
+                    <li><strong>noactivity:</strong> <span class="stat-box">500 samples</span>
+                        <div class="explanation">Subject present but motionless—critical for real-world deployment to distinguish between activity and stillness</div>
+                    </li>
+                    <li><strong>sit:</strong> <span class="stat-box">299 samples</span>
+                        <div class="explanation">Transition from standing to seated position (not capped at 500 because fewer than 500 valid windows existed)</div>
+                    </li>
+                    <li><strong>stand:</strong> <span class="stat-box">265 samples</span>
+                        <div class="explanation">Transition from seated to standing position (limited samples due to brief activity duration)</div>
+                    </li>
+                    <li><strong>standfromlie:</strong> <span class="stat-box">500 samples</span>
+                        <div class="explanation">Transition from lying down to standing upright</div>
+                    </li>
+                    <li><strong>walk:</strong> <span class="stat-box">500 samples</span>
+                        <div class="explanation">Continuous walking motion with characteristic periodic Doppler signature</div>
+                    </li>
+                </ul>
+            </li>
+            
+            <li><strong>Balancing strategy:</strong> Capped maximum samples per class at <span class="highlight">500</span>
+                <div class="explanation">Classes with more than 500 samples were randomly downsampled. Classes with fewer samples (sit: 299, stand: 265) retained all available samples. This moderate imbalance (1.9:1 ratio) is acceptable and reflects the natural difficulty of capturing brief transitional activities</div>
+            </li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h3>Train/Validation/Test Split</h3>
+        <ul>
+            <li><strong>Training set:</strong> <span class="stat-box">1,838 samples (60%)</span>
+                <div class="explanation">Used for model weight optimization through backpropagation. Largest portion ensures sufficient examples for the model to learn discriminative Doppler patterns for each activity</div>
+            </li>
+            
+            <li><strong>Validation set:</strong> <span class="stat-box">613 samples (20%)</span>
+                <div class="explanation">Used for hyperparameter tuning and model selection during the grid search. Never used for gradient updates to provide unbiased performance estimates during development</div>
+            </li>
+            
+            <li><strong>Test set:</strong> <span class="stat-box">613 samples (20%)</span>
+                <div class="explanation">Held out completely until final evaluation. Provides unbiased estimate of model generalization to unseen data. Only examined after all model development decisions were finalized</div>
+            </li>
+            
+            <li><span class="success">Stratified splitting</span> applied to maintain class distribution across all splits
+                <div class="explanation">Ensures that each split contains approximately the same proportion of each activity class. For example, if "walk" represents 16.3% of the balanced dataset, it represents ~16.3% of train, validation, and test sets. This prevents scenarios where rare classes might be entirely absent from a split</div>
+            </li>
+            
+            <li><strong>Important limitation:</strong> Split performed at the <span class="warning">window level</span>, not experiment level
+                <div class="explanation">The same experiment (and subject) may have windows appearing in both training and test sets. This means the model has seen similar Doppler characteristics during training, which may inflate performance estimates. True generalization to unseen subjects requires leave-one-subject-out validation (planned future work)</div>
+            </li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h3>Preprocessing Rationale</h3>
+        <ul>
+            <li><strong>Why balance classes?</strong>
+                <div class="explanation">Without balancing, a naive model could achieve 58% accuracy by always predicting "noactivity". Class balancing forces the model to learn discriminative features rather than exploiting dataset biases</div>
+            </li>
+            
+            <li><strong>Why retain "noactivity"?</strong>
+                <div class="explanation">Unlike the original OperaNET paper, we kept "noactivity" because real-world deployments must distinguish between "no person present" and "person present but still". This is critical for applications like elderly monitoring where prolonged stillness may indicate a fall or health emergency</div>
+            </li>
+            
+            <li><strong>Why remove tagging classes?</strong>
+                <div class="explanation">The "N_persons_tag_leftarm" classes were experimental annotations, not natural activities. Including them would train the model on artificial movements that won't occur during real deployment</div>
+            </li>
+            
+            <li><strong>Random chance baseline:</strong> <span class="highlight">14.3%</span> accuracy (1/7 classes)
+                <div class="explanation">Any model must significantly exceed this baseline to demonstrate it's learning meaningful patterns from the Doppler spectrograms rather than making random guesses</div>
+            </li>
+        </ul>
+    </div>
 
 <br>
 
@@ -278,7 +389,6 @@ Visual examples will include:
 
 Future improvements include:
 <ul>
-  <li>Resolving MATLAB metadata into Python-readable format</li>
   <li>Running full subject-level generalization tests</li>
   <li>Experimenting with Vision Transformers (ViTs)</li>
   <li>Performing cross-modal comparisons with CSI-based models</li>
