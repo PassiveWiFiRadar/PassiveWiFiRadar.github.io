@@ -181,11 +181,34 @@ Our baseline is a standard CNN implemented using PyTorch with four convolutional
 
 <h3>Approach: MODIFIED model 1 - Test On Never Before Seen Room</h3>
  The network must learn spatial–temporal patterns from Doppler spectrogram windows regardless of which room they were recorded in. The generalization question is handled strictly in the data split—training on windows from some rooms and testing on an unseen room—not in the structure of the model itself. In other words, the architecture remains a 4-layer convolutional front-end followed by a dense classifier head with seven outputs, but the training distribution shifts to evaluate environmental robustness rather than requiring any redesign of the network.
-  <h3>Approach: MODIFIED model 2</h3>
+<h3>Approach: MODIFIED model 2</h3>
   
 A practical challenge emerged immediately: the room number and personID metadata are stored in MATLAB-specific formats that we were unable to parse in our Google CoLab environment. We used MATLAB to export the data in a non-proprietary format before proceeding with our CoLab data processing.
 After resolving metadata loading, spectrograms are normalized, resized to a consistent tensor shape, optionally augmented (noise, small shifts), and split into train/validation/test sets.
 
+<h3>Approach: MODIFIED model 3 - Distinguish between different people</h3>
+
+One interesting question we had was this: if a PWR can be used to accurately distinguish between different types of activity, could it also be used to distinguish between different people? This model was almost identical to the baseline in terms of methodology. The main difference was that instead of using activity labels, we trained the model with the personID labels. The people in the experiments were simply labeled with strings from “One” to “Seven.” In the preprocessing, we excluded experiment_028, since that one has a slightly different methodology and doesn’t include accurate personID. Unlike the baseline model, we also increased the maximum samples per class to 1400, which can be seen in the image below. 
+
+  <div class="figure-container">
+  <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
+    <img style="height: 500px;" alt="" src="personIDclassdist.png">
+  </div>
+  <div class="caption">
+For the model itself, we used the exact same CNN as the baseline. After training, we evaluated the accuracy on the test loader to be 74.18%, which is quite impressive considering the difficulty of the problem. The confusion matrix below also shows which people the model found easier to identify and which ones were more difficult.
+      </div>
+</div>
+
+  <div class="figure-container">
+  <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
+    <img style="height: 500px;" alt="" src="personIDconfusion.png">
+  </div>
+  <div class="caption">
+
+      </div>
+</div>
+
+  
 <br><br>
 
 
