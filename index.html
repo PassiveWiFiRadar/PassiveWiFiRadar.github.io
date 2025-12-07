@@ -127,7 +127,7 @@ The goal of this project is to explore the use of WiFi as a unique form of compu
 
 <br><br>
 
-The remainder of this report is structured as follows: a brief background on passive radar fundamentals is provided, followed by a detailed description of the dataset used in this project. We then present our baseline CNN and data processing pipeline. Four experiments are explored: basic activity classification, cross-room generalization, person identification, and the addition of a rejection class for low-confidence predictions.
+The remainder of this report is structured as follows: a brief background on passive radar fundamentals is provided, followed by a detailed description of the dataset used in this project. We then present our baseline CNN and data processing pipeline. Three experiments are explored: basic activity classification, cross-room generalization, and person identification.
 <br><br>
 
 <h1>Background</h1>
@@ -191,10 +191,10 @@ Test dataset label distribution for the baseline HAR model.
 The final preprocessing step was to convert the string activity labels to integers: '0' for "bodyrotate", '1' for "liedown", and so on, up to 5.
 
 <h2>The Model</h2>
-Our baseline is a standard CNN implemented using PyTorch with three convolutional layers, ReLU activations, maxpooling, batch normalization and a fully connected classifier head. The number of feature map outputs is 16, 32, and 64 for the three layers, respectively. The linear classifier neural network has two fully connected layers with 128 and 6 outputs, respectively.  Our optimizer is Adam, using the cross-entropy loss function. We validated the selection of several hyperparameters, including learning rate, weight decay, dropout, and batch size with a simple, small grid search.
+Our baseline is a standard CNN adapted from Hmework 5, implemented using PyTorch with three convolutional layers, ReLU activations, maxpooling, batch normalization and a fully connected classifier head. The number of feature map outputs is 16, 32, and 64 for the three layers, respectively. The number of layers and feature maps was tuned manually through trial and error. The linear classifier neural network has two fully connected layers with 128 and 6 outputs, respectively.  Our optimizer is Adam, using the cross-entropy loss function. We automatically validated the selection of several hyperparameters, including learning rate, weight decay, dropout, and batch size with a simple, small grid search.
 
   <h2>Experiment 1 Results</h2>
-  Results indicate a test accuracy of 77.4%, with a per-class classification accuracy at or exceeding 70% for all classes except liedown, with an accuracy of 50%. The model has some apparent confusion distinguishing between sitting and lying down, which is reasonable given the similarity of the motions. Walking was the most accurately predicted class of the six by a wide margin at 91%, likely because it produces particularly strong Doppler shifts.
+  Results indicate a test accuracy of 77.4%, with a per-class classification accuracy at or exceeding 70% for all classes except liedown, with an accuracy of 50%. The model has some apparent confusion distinguishing between sitting and lying down, which is reasonable given the similarity of the motions. Walking was the most accurately predicted class of the six by a wide margin at 91%, likely because it produces particularly strong Doppler shifts. Overall, the model performance is clearly better than random guessing, which would have an accuracy around 17%. With a training accuracy of 98.8%, we suspect there is some lingering overfitting, although this is somewhat reduced by hyperparameter selection.
   <br><br>
     <div class="figure-container">
   <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
@@ -205,7 +205,7 @@ Our baseline is a standard CNN implemented using PyTorch with three convolutiona
       </div>
 </div>
 
-The F1 scores--a measure of precision and recall performance--closely follow the confusion matrix, with "walk" having the highest score at 0.918 and liedown with the lowest at 0.534.
+The F1 scores--a combined measure of precision and recall performance--closely follow the confusion matrix, with "walk" having the highest score at 0.918 and liedown with the lowest at 0.534. Note that precision is a measure of how often the model is correct when it chooses a particular class. Recall is simply the number of true test instances that the model correctly classifies. 
 
   <br><br>
   <table border="1" cellpadding="6" cellspacing="0">
@@ -245,7 +245,7 @@ The F1 scores--a measure of precision and recall performance--closely follow the
 
 These scores indicate that strong, repetitive Doppler patterns like "bodyrotate" and "walk" are much better captured than the more transient activities.
   <br><br>
-  Finally, the optimal hyperparameters and corresponding validation accuracy are given below.
+  Finally, the optimal hyperparameters and corresponding validation accuracy are given below. Note that learning rate refers to the step size used in gradient descent as the model updates its weights and attempts to find a good minimum close to the global one; a larger learning rate means larger steps, potentially speeding up convergence at the risk of overshooting the minimum and causing divergence. Weight decay is a form of regularization that penalizes large weights, which in a CNN translates to less aggressive filters. This can help reduce overfitting. The batch size is the number of training windows passed to the model before each weight update cycle. Finally, dropout randomly sets some proportion of the activations in the fully connected network to zero to improve overfitting.
   <!-- Accuracy Table -->
 <table style="border-collapse:collapse; width:100%; font-family:Arial, sans-serif; margin-bottom:16px;">
   <thead>
@@ -278,7 +278,7 @@ These scores indicate that strong, repetitive Doppler patterns like "bodyrotate"
   </thead>
   <tbody>
     <tr>
-      <td style="border:1px solid #eee; padding:6px;"><strong>lr</strong></td>
+      <td style="border:1px solid #eee; padding:6px;"><strong>learning_rate</strong></td>
       <td style="border:1px solid #eee; padding:6px;">0.001</td>
     </tr>
     <tr>
@@ -437,7 +437,7 @@ The 31 experiments from non-Room-2 environments were first separated, then rando
 
 <h1>Experiment 3: Person Identification</h1>
 
-One interesting question we had was this: if a PWR can be used to accurately distinguish between different types of activity, could it also be used to distinguish between different people? This model was almost identical to the baseline in terms of methodology. The main difference was that instead of using activity labels, we trained the model with the personID labels. The people in the experiments were simply labeled with strings from “One” to “Seven.” In the preprocessing, we excluded experiment_028, since that one has a slightly different methodology and doesn’t include accurate personID. Unlike the baseline model, we also increased the maximum samples per class to 1400, which can be seen in the image below. 
+One interesting question we had was this: if a PWR can be used to accurately distinguish between different types of activity, could it also be used to distinguish between different people? This model was almost identical to the baseline in terms of methodology. The main difference was that instead of using activity labels, we trained the model with the personID labels. The people in the experiments were simply labeled with strings from “One” to “Six.” Unlike the baseline model, we also reduced the maximum samples per class to 1400 for stricter class balancing, which can be seen in the image below. 
 
   <div class="figure-container">
   <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
@@ -448,11 +448,11 @@ One interesting question we had was this: if a PWR can be used to accurately dis
       </div>
 </div>
 <h2>Experiment 3 Results</h2>
-For the model itself, we used the exact same CNN as the baseline. After training, we evaluated the accuracy on the test loader to be 74.18%, which is quite impressive considering the difficulty of the problem. The confusion matrix below also shows which people the model found easier to identify and which ones were more difficult.
+For the model itself, we used the exact same CNN as the baseline. After training, we evaluated the accuracy on the test loader to be 74.18%. However, this result comes with an enormous qualification: to achieve this, we perform a stratified train-test-validation split of 60%/20%/20% across all experiments. This is quite different from the baseline, where experiments from the test set were excluded from the training set. The resulting leakage inflates our test accuracy.
 
   <div class="figure-container">
   <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
-    <img style="height: 500px;" alt="" src="TODO-replace with revised matrix">
+    <img style="height: 500px;" alt="" src="personIDconfusion.png">
   </div>
   <div class="caption">
 
@@ -462,21 +462,15 @@ For the model itself, we used the exact same CNN as the baseline. After training
   
 <br><br>
 
-
+We attempted to separate the sets by experiment and found that, despite attempts at regularization, training accuracy often exceeded 98% while test accuracy often was on the order of 20% (random guessing). As each experiment contains only one unique person, we suspect that the model was memorizing experiments rather than learning individual human signatures. We also attempted removing all spectrograms from the dataset other than "walk" samples, under the presumption that walking is more unique to each individual than any of the other classes. However, this had a minimal impact on results.
 <br>
 
 <!-- Qualitative Results -->
-<h3>Qualitative Results</h3>
+<h1>Qualitative Results</h1>
 
 
 <br>
-
-<strong>Figures to include:</strong>
-<ul>
-  <li>Sample Doppler spectrograms for each activity</li>
-  <li>Success case predictions</li>
-  <li>Failure case predictions</li>
-</ul>
+Below is a snapshot of spectrograms from the test set of the baseline model (Experiment 1). They are labeled with the true class label, followed by the predicted label. We observe that some samples from different classes look visually very similar to each other, potentially explaining some of the mistaken classifications.
 
 <div class="figure-container">
   <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
@@ -488,16 +482,8 @@ For the model itself, we used the exact same CNN as the baseline. After training
 
 <!-- Conclusion -->
 <h1>Conclusion</h1>
+Overall, this project successfully demonstrates that HAR with PWR Doppler spectrograms is generally possible with accuracy well above random chance, and even generalizes well to a new room that the model has never seen before. While some classes, such as liedown, were significantly harder to identify than more obvious motions, such as walking, the confusion matrices consistently show results that are far better than random guessing. F1 scores also indicate that the network is learning meaningful patterns rather than memorizing. The qualitative results show that this is indeed a difficult classification task, with different activities appearing almost indistinguishable from each other in the spectrogram images. For future work, it may be interesting to incorporate a vision transformer to handle the temporal data, particularly on a larger dataset if one becomes available.
 
-  
-<br><br>
-
-Future improvements may include:
-<ul>
-  <li>Running full subject-level generalization tests</li>
-  <li>Experimenting with Vision Transformers (ViTs)</li>
-  <li>Performing cross-modal comparisons with CSI-based models</li>
-</ul>
 
 <br><br>
 
@@ -506,26 +492,6 @@ Future improvements may include:
 [1] M. J. Bocus, "A Comprehensive Multimodal Activity Recognition Dataset Acquired from Radio Frequency and Vision-Based Sensors". figshare, 01-Aug-2022. doi: 10.6084/m9.figshare.c.5551209.v1.
 <br><br>
 [2] H Griffiths and C. J. Baker, An introduction to passive radar. Boston: Artech House, 2017.
-
-  
-    <div class="section">
-        <h2>Appendix: Hyperparameter Optimization Grid Search</h2>
-
-        <div class="metric-card">
-            <h4>6. Validation Accuracy During Grid Search</h4>
-            <ul>
-                <li><strong>Grid search parameters:</strong>
-                    <ul class="nested-list">
-                        <li>Learning rate: [1e-4, 3e-4, 1e-3]</li>
-                        <li>Weight decay: [0, 1e-4, 1e-3]</li>
-                        <li>Dropout: [0, 0.1, 0.3]</li>
-                        <li>Batch size: [32, 64, 128]</li>
-                        <li><strong>Total combinations:</strong> 81</li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-    </div>
   
 <br><br>
 <b>Use of Generative AI.</b> The authors disclose that GPT-5.1 was used to assist in this project. All code and analysis was verified by the authors, who take full responsibility for the content.
