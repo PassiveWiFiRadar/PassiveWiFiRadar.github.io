@@ -303,9 +303,8 @@ While the baseline experiment demonstrated that CNNs can classify activities fro
 </p>
 <h2>Approach</h2>
 <p>
-To test true environmental generalization, we designed an experiment where <strong>all data from Room 2 is held out as a test set</strong>, while the model is trained exclusively on data from Room 1. This "leave-one-room-out" approach provides a realistic assessment of how the model would perform when deployed in a new location, which is essential for practical applications like elderly care monitoring, smart home systems, or security applications where the system must work in diverse environments.
-A practical challenge emerged immediately: the room number and personID metadata are stored in MATLAB-specific formats that we were unable to parse in our Google CoLab environment. We used MATLAB to export the data in a non-proprietary format before proceeding with our CoLab data processing.
-After resolving metadata loading, spectrograms are normalized, resized to a consistent tensor shape, and split into train/validation/test sets.
+To test true environmental generalization, we designed an experiment where <strong>all data from Room 2 is held out as a test set</strong>, while the model is trained exclusively on data from Room 1. This "leave-one-room-out" approach provides a realistic assessment of how the model would perform when deployed in a new location, which is essential for practical applications like elderly care monitoring, smart home systems, or security applications where the system must work in diverse environments. 
+Initially, the room number and personID metadata are stored in MATLAB-specific formats that we were unable to parse in our Google CoLab environment. We used MATLAB to export the data in a non-proprietary format before proceeding with our CoLab data processing. After resolving metadata loading, spectrograms are normalized, resized to a consistent tensor shape, and split into train/validation/test sets.
 </p>
 
 <div class="interpretation">
@@ -330,7 +329,7 @@ The 31 experiments from non-Room-2 environments were first separated, then rando
     <img style="height: 500px;" alt="" src="training_matrix.png">
   </div>
   <div class="caption">
-    The Confusion Matrix on training data (rooms 1,3,4)
+    The Confusion Matrix on training data
     </div>
   </div>
         <div class="figure-container">
