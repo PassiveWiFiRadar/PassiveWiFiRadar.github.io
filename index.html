@@ -329,110 +329,66 @@ The 31 experiments from non-Room-2 environments were first separated, then rando
     <img style="height: 500px;" alt="" src="training_matrix.png">
   </div>
   <div class="caption">
-    The Confusion Matrix on training data
-    </div>
-  </div>
-        <div class="figure-container">
-  <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
-    <img style="height: 500px;" alt="" src="room2_general.png">
-  </div>
-  <div class="caption">
     The Confusion Matrix on the unseen Room 2
   </div>
   </div>
-  <h3>Initial Distribution (Training Set, Before Balancing)</h3>
-<table style="margin: 20px 0;">
-<tr>
-<th>Class</th>
-<th>Sample Count</th>
-</tr>
-<tr>
-<td>Background_start</td>
-<td>199</td>
-</tr>
-<tr>
-<td>bodyrotate</td>
-<td>2,465</td>
-</tr>
-<tr>
-<td>liedown</td>
-<td>793</td>
-</tr>
-<tr>
-<td>sit</td>
-<td>709</td>
-</tr>
-<tr>
-<td>stand</td>
-<td>706</td>
-</tr>
-<tr>
-<td>standfromlie</td>
-<td>780</td>
-</tr>
-<tr>
-<td>walk</td>
-<td>2,291</td>
-</tr>
-<tr style="font-weight: bold;">
-<td>Total</td>
-<td>7,943</td>
-</tr>
-</table>
   
-<td><strong>Test</strong></td>
-<td>2,444 windows</td>
-<td>3 channels × 100 freq bins × 40 time steps</td>
-</tr>
-<tr style="font-weight: bold;">
-<td>Total</td>
-<td>12,017 windows</td>
-<td>—</td>
-</tr>
+  <br><br>
+  <table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Class</th>
+      <th>F1 Score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>bodyrotate</td>
+      <td>0.879</td>
+    </tr>
+    <tr>
+      <td>liedown</td>
+      <td>0.700</td>
+    </tr>
+    <tr>
+      <td>sit</td>
+      <td>0.647</td>
+    </tr>
+    <tr>
+      <td>stand</td>
+      <td>0.730</td>
+    </tr>
+    <tr>
+      <td>standfromlie</td>
+      <td>0.678</td>
+    </tr>
+    <tr>
+      <td>walk</td>
+      <td>0.923</td>
+    </tr>
+  </tbody>
 </table>
 
-<p><strong>Final class distribution (Test Set):</strong></p>
-<table style="margin: 20px 0;">
-<tr>
-<th>Activity Class</th>
-<th>Test Samples</th>
-<th>Description</th>
-</tr>
-<tr>
-<td>bodyrotate</td>
-<td>699</td>
-<td>Subject rotating body in place</td>
-</tr>
-<tr>
-<td>liedown</td>
-<td>189</td>
-<td>Transition to horizontal position</td>
-</tr>
-<tr>
-<td>sit</td>
-<td>261</td>
-<td>Transition from standing to seated</td>
-</tr>
-<tr>
-<td>stand</td>
-<td>278</td>
-<td>Transition from seated to standing</td>
-</tr>
-<tr>
-<td>standfromlie</td>
-<td>196</td>
-<td>Transition from lying to standing</td>
-</tr>
-<tr>
-<td>walk</td>
-<td>821</td>
-<td>Continuous walking motion</td>
-</tr>
-<tr style="font-weight: bold;">
-<td>Total</td>
-<td>2,444</td>
-<td>6 activity classes</td>
-</tr>
+These scoresare consistent with the baseline model
+  <br><br>
+  Finally, the validation and test accuracy are given below.   
+  <!-- Accuracy Table -->
+<table style="border-collapse:collapse; width:100%; font-family:Arial, sans-serif; margin-bottom:16px;">
+  <thead>
+    <tr>
+      <th colspan="2" style="border:1px solid #ddd; padding:10px; text-align:left; background:#f0f0f0; font-size:14px;">
+        Model Performance
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="border:1px solid #ddd; padding:8px; width:60%;"><strong>Validation accuracy</strong></td>
+      <td style="border:1px solid #ddd; padding:8px; width:40%;">83.10&nbsp;%</td>
+      <td style="border:1px solid #ddd; padding:8px; width:60%;"><strong>Test accuracy</strong></td>
+      <td style="border:1px solid #ddd; padding:8px; width:40%;">68.70&nbsp;%</td>
+    </tr>
+  </tbody>
 </table>
 
 <h1>Experiment 3: Person Identification</h1>
