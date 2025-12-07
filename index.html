@@ -376,67 +376,11 @@ For the model itself, we used the exact same CNN as the baseline. After training
 <br><br>
 
 
-
-    <div class="section">
-        <h3>Baseline Comparisons</h3>
-
-        <table class="comparison-table">
-            <thead>
-                <tr>
-                    <th>Baseline</th>
-                    <th>Expected Performance</th>
-                    <th>Purpose</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>Random Guessing</strong></td>
-                    <td>14.3% (1/7 classes)</td>
-                    <td>Absolute minimum performance threshold</td>
-                </tr>
-                <tr>
-                    <td><strong>Majority Class</strong></td>
-                    <td>~16.3% (always predict "bodyrotate", "liedown", "noactivity", "standfromlie", or "walk")</td>
-                    <td>Shows benefit of learning vs exploiting dataset bias (prevented by class balancing)</td>
-                </tr>
-                <tr>
-                    <td><strong>Shallow CNN (Baseline Model)</strong></td>
-                    <td>Target: ≥70%</td>
-                    <td>Demonstrates feasibility of CNN-based approach for RF spectrograms</td>
-                </tr>
-                <tr>
-                    <td><strong>Deeper Architectures (Future)</strong></td>
-                    <td>Expected: ≥75%</td>
-                    <td>Quantify benefit of architectural complexity</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <div class="section">
-        <h3>Success Criteria</h3>
-        <div class="success-box">
-            <strong>Minimum Viable Performance:</strong>
-            <ul style="margin-top: 10px;">
-                <li>Test accuracy ≥ 70%</li>
-                <li>No single class with F1-score < 0.5</li>
-                <li>Training-test accuracy gap < 15% (acceptable generalization)</li>
-                <li>Validation accuracy guides hyperparameter selection effectively</li>
-            </ul>
-        </div>
-
-    </div>
-
 <br>
 
 <!-- Qualitative Results -->
 <h3>Qualitative Results</h3>
-Visual examples will include:
-<ul>
-  <li>Correctly classified spectrogram examples</li>
-  <li>Misclassified examples</li>
-  <li>Activity-specific Doppler patterns (e.g., walking ≠ running energy distribution)</li>
-</ul>
+
 
 <br>
 
@@ -445,7 +389,6 @@ Visual examples will include:
   <li>Sample Doppler spectrograms for each activity</li>
   <li>Success case predictions</li>
   <li>Failure case predictions</li>
-  <li>Confusion matrix heatmap</li>
 </ul>
 
 <div class="figure-container">
@@ -457,7 +400,7 @@ Visual examples will include:
 <br><br>
 
 <!-- Conclusion -->
-<h3>Conclusion</h3>
+<h1>Conclusion</h1>
 
   
 <br><br>
