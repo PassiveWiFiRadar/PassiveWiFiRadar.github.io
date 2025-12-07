@@ -93,7 +93,7 @@ th {
 
 <!-- Abstract -->
 <h3>Abstract</h3>
-Wireless sensing offers a privacy-preserving alternative to camera-based computer vision, yet datasets from passive WiFi radar (PWR) systems remain underexplored in vision contexts. In this project, Doppler spectrograms derived from WiFi reflections are treated as three-channel images and analyzed using convolutional neural networks for human activity recognition. We develop a training pipeline for OperaNET Doppler data, run baseline and deeper CNN models, and explore generalization to unseen subjects. Preliminary results indicate that standard computer vision architectures can meaningfully classify activities from non-visual RF data with accuracy significantly above random chance.
+Wireless sensing offers a privacy-preserving alternative to camera-based computer vision, yet datasets from passive WiFi radar (PWR) systems remain underexplored in vision contexts. In this project, Doppler spectrograms derived from WiFi reflections are treated as three-channel images and analyzed using convolutional neural networks (CNNs) for human activity recognition. We develop a training pipeline for OperaNET Doppler data, run baseline human activity classification, and explore some variations of this problem. Results indicate that a simple CNN can meaningfully classify activities from non-visual RF data with accuracy generally exceeding 70% for five of six classes of human activity.
 
 <br><br>
 
@@ -104,7 +104,7 @@ Wireless sensing offers a privacy-preserving alternative to camera-based compute
     <img style="height: 500px;" alt="" src="mainfig.png">
   </div>
   <div class="caption">
-    Treating passive WiFi radar Doppler spectrograms like images enables classic computer-vision models to classify human activities without cameras.
+    Treating passive WiFi radar Doppler spectrograms like images enables classic computer-vision models to classify human activities without cameras. This figure was obtained from [1].
   </div>
 </div>
 
@@ -599,9 +599,12 @@ Future improvements include:
 <!-- References -->
 <h3>References</h3>
 [1] M. J. Bocus, "A Comprehensive Multimodal Activity Recognition Dataset Acquired from Radio Frequency and Vision-Based Sensors". figshare, 01-Aug-2022. doi: 10.6084/m9.figshare.c.5551209.v1.
-
 <br><br>
+[2] H Griffiths and C. J. Baker, An introduction to passive radar. Boston: Artech House, 2017.
 
+  
+<br><br>
+Use of Generative AI. The authors disclose that GPT-5.1 was used to assist in this project. All code and analysis was verified by the authors, who take full responsibility for the content.
 <hr>
 <footer> 
   <p>© Sean Stafford, Austin Roberts, Jackson Moody</p>
