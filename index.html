@@ -379,12 +379,7 @@ The 31 experiments from non-Room-2 environments were first separated, then rando
 <td>7,943</td>
 </tr>
 </table>
-
-<p>The severe imbalance (12× difference between most and least common classes) necessitated class balancing to prevent the model from simply predicting the most frequent classes.</p>
-
-<h3>Class Balancing and Filtering</h3>
-<p>We removed the "Background_start" class (calibration data with no subjects present) and capped all remaining classes at 2,000 samples maximum per channel. Classes with more samples were randomly downsampled; classes with fewer samples retained all available data.</p>
-
+  
 <h3>Final Dataset Composition</h3>
 
 <table style="margin: 20px 0;">
@@ -459,13 +454,6 @@ The 31 experiments from non-Room-2 environments were first separated, then rando
 </tr>
 </table>
 
-<p><strong>Key preprocessing decisions:</strong></p>
-<ul>
-<li>Experiment-level splitting prevents data leakage between train and test sets</li>
-<li>30% activity threshold balances capturing brief activities while excluding pure "noactivity" windows</li>
-<li>2,000 sample cap per class reduces but doesn't eliminate imbalance (walk: 821 vs liedown: 189 in test set reflects natural activity distribution)</li>
-<li>Three-channel data treated as RGB-like image input (Channel 1, 2, 3 from three surveillance antennas)</li>
-</ul>
 <h1>Experiment 3: Person Identification</h1>
 
 One interesting question we had was this: if a PWR can be used to accurately distinguish between different types of activity, could it also be used to distinguish between different people? This model was almost identical to the baseline in terms of methodology. The main difference was that instead of using activity labels, we trained the model with the personID labels. The people in the experiments were simply labeled with strings from “One” to “Seven.” In the preprocessing, we excluded experiment_028, since that one has a slightly different methodology and doesn’t include accurate personID. Unlike the baseline model, we also increased the maximum samples per class to 1400, which can be seen in the image below. 
