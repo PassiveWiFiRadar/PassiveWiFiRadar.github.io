@@ -152,10 +152,9 @@ The creators of OPERAnet chose to exclude relative range data from the dataset d
   <br><br>
   A total of 38 separate experiment files containing the PWR data were provided in .mat format, including the activity labels, experiment number, person ID and room number. The activities recorded include "background", "bodyrotate", "sit", "stand", "standfromlie", "walk", "liedown", and "noactivity". These labels are stored as string values in the dataset. The label with the shortest total recording duration was "background", at 18.3465 minutes, while the longest was "noactivity" (steady state), at 124.86 minutes [1]. The dataset includes a crowd-counting experiment in which the labels are not human activities, but rather the number of people present in the room. We excluded this experiment file from our pipeline.
 
-<!-- Approach -->
-  <h1>Approach</h1>
-  <h2>Experiment 1: Activity Classification: </h2>
-<h3>Preprocessing</h3>
+
+<h1>Experiment 1: Human Activity Classification Baseline </h1>
+<h2>Preprocessing</h2>
 Our data processing and classification pipeline was implemented in Python on Google Colab. We modified a Python-based visualization script provided with the dataset [1] to convert the Doppler frequency shift data to spectrograms. Since most received power appears in the middle 100 bins, only Doppler bins 50 to 150 were kept. The linear power values are converted to decibel values. With 38 PWR experiments available to us, the output of this stage provided 37 sets of three spectrograms (excluding the crowd-counting experiment), each 100 pixels in height and 10 * N_s pixels in length, where N_s is the length in seconds of the experiment. 
 <br><br>
   <div class="figure-container">
@@ -192,10 +191,10 @@ Test dataset label distribution for the baseline HAR model.
   <br><br>
 The final preprocessing step was to convert the string activity labels to integers: '0' for "bodyrotate", '1' for "liedown", and so on, up to 5.
 
-<h2>Baseline Model</h2>
+<h2>The Model</h2>
 Our baseline is a standard CNN implemented using PyTorch with three convolutional layers, ReLU activations, maxpooling, batch normalization and a fully connected classifier head. The number of feature map outputs is 16, 32, and 64 for the three layers, respectively. The linear classifier neural network has two fully connected layers with 128 and 6 outputs, respectively.  Our optimizer is Adam, using the cross-entropy loss function. We validated the selection of several hyperparameters, including learning rate, weight decay, dropout, and batch size with a simple, small grid search.
 
-  <h2>Baseline HAR Results</h2>
+  <h2>Experiment 1 Results</h2>
   Results indicate a test accuracy of 77.4%, with a per-class classification accuracy at or exceeding 70% for all classes except liedown, with an accuracy of 50%. The model has some apparent confusion distinguishing between sitting and lying down, which is reasonable given the similarity of the motions. Walking was the most accurately predicted class of the six by a wide margin at 91%, likely because it produces particularly strong Doppler shifts.
   <br><br>
     <div class="figure-container">
@@ -299,12 +298,12 @@ These scores indicate that strong, repetitive Doppler patterns like "bodyrotate"
 </table>
 
   <br><br>
-<h2>Experiment 2: Room Generalization </h2>
+<h1>Experiment 2: Room Generalization </h1>
  The network must learn spatial–temporal patterns from Doppler spectrogram windows regardless of which room they were recorded in. The generalization question is handled strictly in the data split, where it trains on windows from some rooms and testing on an unseen room, not in the structure of the model itself. 
 <p>
-While the baseline experiment demonstrated that CNNs can classify activities from WiFi Doppler spectrograms, it used a random train/test split where the same physical environments (and potentially the same subjects) appeared in both training and testing. This approach, while standard for evaluating general classification performance, does not address if the model generalizes to new physical environments it has never encountered during training.
+While the baseline experiment demonstrated that CNNs can classify activities from WiFi Doppler spectrograms, it used a random train/test split by experiment, where the same physical rooms (and the same subjects) appeared in both training and testing. This approach, while standard for evaluating general classification performance, does not address if the model generalizes to new physical environments it has never encountered during training.
 </p>
-
+<h2>Approach</h2>
 <p>
 To test true environmental generalization, we designed an experiment where <strong>all data from Room 2 is held out as a test set</strong>, while the model is trained exclusively on data from all other rooms (Rooms 1, 3, and 4). This "leave-one-room-out" approach provides a realistic assessment of how the model would perform when deployed in a new location, which is essential for practical applications like elderly care monitoring, smart home systems, or security applications where the system must work in diverse environments.
   A practical challenge emerged immediately: the room number and personID metadata are stored in MATLAB-specific formats that we were unable to parse in our Google CoLab environment. We used MATLAB to export the data in a non-proprietary format before proceeding with our CoLab data processing.
@@ -312,7 +311,7 @@ After resolving metadata loading, spectrograms are normalized, resized to a cons
 
 </p>
 
-<h4>Data Splitting Strategy</h4>
+<h3>Data Splitting Strategy</h3>
 <p>
 Unlike the baseline experiment which performed a random 60/20/20 split across all data, the room generalization experiment enforces a strict spatial separation:
 </p>
@@ -322,7 +321,7 @@ Unlike the baseline experiment which performed a random 60/20/20 split across al
 </div>
 
 
-<h4>Class Distribution</h4>
+<h3>Class Distribution</h3>
   <div class="figure-container">
   <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
     <img style="height: 500px;" alt="" src="class_dist_room_experiment.png">
@@ -331,7 +330,7 @@ Unlike the baseline experiment which performed a random 60/20/20 split across al
   <div class="caption">
     The final dataset composition after preprocessing and class balancing
     </div>
-    
+    <h2>Experiment 2 Results</h2>
   </div>
     <div class="figure-container">
   <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
@@ -349,7 +348,7 @@ Unlike the baseline experiment which performed a random 60/20/20 split across al
     The Confusion Matrix on the unseen Room 2
   </div>
   </div>
-<h2>Experiment 3: Person Identification</h2>
+<h1>Experiment 3: Person Identification</h1>
 
 One interesting question we had was this: if a PWR can be used to accurately distinguish between different types of activity, could it also be used to distinguish between different people? This model was almost identical to the baseline in terms of methodology. The main difference was that instead of using activity labels, we trained the model with the personID labels. The people in the experiments were simply labeled with strings from “One” to “Seven.” In the preprocessing, we excluded experiment_028, since that one has a slightly different methodology and doesn’t include accurate personID. Unlike the baseline model, we also increased the maximum samples per class to 1400, which can be seen in the image below. 
 
@@ -361,12 +360,12 @@ One interesting question we had was this: if a PWR can be used to accurately dis
     
       </div>
 </div>
-
+<h2>Experiment 3 Results</h2>
 For the model itself, we used the exact same CNN as the baseline. After training, we evaluated the accuracy on the test loader to be 74.18%, which is quite impressive considering the difficulty of the problem. The confusion matrix below also shows which people the model found easier to identify and which ones were more difficult.
 
   <div class="figure-container">
   <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
-    <img style="height: 500px;" alt="" src="TODO">
+    <img style="height: 500px;" alt="" src="TODO-replace with revised matrix">
   </div>
   <div class="caption">
 
@@ -377,218 +376,6 @@ For the model itself, we used the exact same CNN as the baseline. After training
 <br><br>
 
 
-<!-- Experiments and Results -->
-<h3>Experiments and Results</h3>
-
-<h2>Dataset Composition</h2>
-<strong>OperaNET PWR Doppler dataset</strong>
-<div class="section">
-        <h2>Dataset Composition and Preprocessing</h2>
-        <div class="intro-text">
-            The OperaNET PWR dataset required substantial preprocessing to address severe class imbalance and remove irrelevant activity categories. This section details the transformation from raw windowed spectrograms to a balanced, training-ready dataset.
-        </div>
-    </div>
-
-    <div class="section">
-        <h3>Initial Distribution (Before Balancing)</h3>
-        <ul>
-            <li><strong>Total samples:</strong> <span class="stat-box">23,916</span> windowed spectrograms
-                <div class="explanation">Each sample represents a 4-second window (40 time steps at 10 Hz) of three-channel Doppler spectrogram data</div>
-            </li>
-            
-            <li><span class="warning">Highly imbalanced</span> with "noactivity" dominating at <span class="highlight">13,867 samples (58%)</span>
-                <div class="explanation">The "noactivity" class represents steady-state periods when subjects are motionless between activities. This extreme imbalance occurred because subjects spent significant time stationary while the experimenters prepared for the next activity</div>
-            </li>
-            
-            <li>Activity sample counts ranged dramatically from <span class="highlight">162 samples</span> (6_persons_tag_leftarm) to <span class="highlight">3,537 samples</span> (walk)
-                <div class="explanation">This 22× difference between minimum and maximum class sizes would cause the model to be biased toward predicting overrepresented classes, particularly "noactivity" and "walk"</div>
-            </li>
-            
-            <li>Dataset contained <span class="warning">unwanted calibration and tagging activities</span>:
-                <ul class="nested-list">
-                    <li>1_persons_tag_leftarm through 6_persons_tag_leftarm (tagging sequences where experimenters identified subjects)</li>
-                    <li>Background_start (calibration measurements with no subjects present)</li>
-                </ul>
-                <div class="explanation">These classes represented experimental procedures rather than actual human activities of interest, and were removed entirely from the final dataset</div>
-            </li>
-        </ul>
-    </div>
-
-    <div class="section">
-        <h3>Final Balanced Distribution (After Preprocessing)</h3>
-        <ul>
-            <li><strong>Total samples:</strong> <span class="stat-box">3,064</span> windowed spectrograms
-                <div class="explanation">Reduced from 23,916 to 3,064 (87% reduction) by removing unwanted classes and applying class balancing. This ensures the model learns from class patterns rather than class frequencies</div>
-            </li>
-            
-            <li><span class="success">7 activity classes retained</span> representing meaningful human activities
-                <div class="explanation">These seven classes cover the core activities of interest for human activity recognition in indoor environments</div>
-            </li>
-            
-            <li><strong>Class distribution after balancing:</strong>
-                <ul class="nested-list">
-                    <li><strong>bodyrotate:</strong> <span class="stat-box">500 samples</span>
-                        <div class="explanation">Subject rotating their body in place (yaw rotation)</div>
-                    </li>
-                    <li><strong>liedown:</strong> <span class="stat-box">500 samples</span>
-                        <div class="explanation">Transition from standing or sitting to lying horizontal</div>
-                    </li>
-                    <li><strong>noactivity:</strong> <span class="stat-box">500 samples</span>
-                        <div class="explanation">Subject present but motionless—critical for real-world deployment to distinguish between activity and stillness</div>
-                    </li>
-                    <li><strong>sit:</strong> <span class="stat-box">299 samples</span>
-                        <div class="explanation">Transition from standing to seated position (not capped at 500 because fewer than 500 valid windows existed)</div>
-                    </li>
-                    <li><strong>stand:</strong> <span class="stat-box">265 samples</span>
-                        <div class="explanation">Transition from seated to standing position (limited samples due to brief activity duration)</div>
-                    </li>
-                    <li><strong>standfromlie:</strong> <span class="stat-box">500 samples</span>
-                        <div class="explanation">Transition from lying down to standing upright</div>
-                    </li>
-                    <li><strong>walk:</strong> <span class="stat-box">500 samples</span>
-                        <div class="explanation">Continuous walking motion with characteristic periodic Doppler signature</div>
-                    </li>
-                </ul>
-            </li>
-            
-            <li><strong>Balancing strategy:</strong> Capped maximum samples per class at <span class="highlight">500</span>
-                <div class="explanation">Classes with more than 500 samples were randomly downsampled. Classes with fewer samples (sit: 299, stand: 265) retained all available samples. This moderate imbalance (1.9:1 ratio) is acceptable and reflects the natural difficulty of capturing brief transitional activities</div>
-            </li>
-        </ul>
-    </div>
-
-    <div class="section">
-        <h3>Train/Validation/Test Split</h3>
-        <ul>
-            <li><strong>Training set:</strong> <span class="stat-box">1,838 samples (60%)</span>
-                <div class="explanation">Used for model weight optimization through backpropagation. Largest portion ensures sufficient examples for the model to learn discriminative Doppler patterns for each activity</div>
-            </li>
-            
-            <li><strong>Validation set:</strong> <span class="stat-box">613 samples (20%)</span>
-                <div class="explanation">Used for hyperparameter tuning and model selection during the grid search.</div>
-            </li>
-            
-            <li><strong>Test set:</strong> <span class="stat-box">613 samples (20%)</span>
-                <div class="explanation">Held out completely until final evaluation. Provides unbiased estimate of model generalization to unseen data. Only examined after all model development decisions were finalized</div>
-            </li>
-            
-            
-            <li><strong>Important limitation:</strong> Split performed at the <span class="warning">window level</span>, not experiment level
-                <div class="explanation">The same experiment (and subject) may have windows appearing in both training and test sets. This means the model has seen similar Doppler characteristics during training, which may inflate performance estimates. True generalization to unseen subjects requires leave-one-subject-out validation (planned future work)</div>
-            </li>
-        </ul>
-    </div>
-
-
-<br>
-
-<h2>Evaluation Metrics</h2>
-<div class="section">
-        <h2>Evaluation Metrics</h2>
-        <div class="intro-text">
-            Model performance is assessed using multiple complementary metrics that provide different perspectives on classification quality. Our evaluation strategy includes standard classification metrics, confusion matrix analysis, and a novel confidence-based evaluation approach tailored to the characteristics of WiFi-based activity recognition.
-        </div>
-    </div>
-
-    <div class="section">
-        <h3>Primary Metrics</h3>
-
-        <div class="metric-card">
-            <h4>1. Classification Accuracy</h4>
-            <div class="formula">
-                Accuracy = (Number of Correct Predictions) / (Total Number of Predictions)
-            </div>
-            <div class="explanation">
-                <strong>Purpose:</strong> Overall measure of how often the model correctly identifies activities across all seven classes.
-            </div>
-            <ul>
-                <li><strong>Computed separately</strong> for training, validation, and test sets
-                    <div class="explanation">Training accuracy shows how well the model fits the training data. Validation accuracy guides hyperparameter selection. Test accuracy provides the final unbiased performance estimate.</div>
-                </li>
-                <li><strong>Baseline comparison:</strong> Random guessing baseline = <span class="highlight">14.3%</span> (1/7 classes)
-                    <div class="explanation">Any meaningful model must substantially exceed this threshold. We target ≥70% accuracy to demonstrate practical utility.</div>
-                </li>
-                
-            </ul>
-        </div>
-
-        <div class="metric-card">
-            <h4>2. Confusion Matrix</h4>
-            <div class="explanation">
-                <strong>Purpose:</strong> Provides detailed per-class performance breakdown, revealing which activities are easily distinguished and which are commonly confused.
-            </div>
-            <ul>
-                <li><strong>Structure:</strong> 7×7 matrix where rows represent true labels and columns represent predicted labels
-                    <div class="explanation">Diagonal elements show correct classifications. Off-diagonal elements reveal misclassification patterns.</div>
-                </li>
-                <li><strong>Reveals critical patterns:</strong>
-                    <ul class="nested-list">
-                        <li><strong>Transitional activity confusion:</strong> "sit" vs "stand" vs "standfromlie" may show cross-confusion due to similar Doppler signatures during brief movements</li>
-                        <li><strong>Motion vs stillness:</strong> "walk" and "bodyrotate" should be clearly separated from "noactivity"</li>
-                        <li><strong>Class-specific performance:</strong> Some activities may have consistently high recall while others struggle</li>
-                    </ul>
-                </li>
-
-            </ul>
-
-            <div class="warning-box">
-                <strong>Expected Confusion Patterns:</strong> Activities with similar motion profiles (e.g., "sit" and "stand" both involve vertical torso movement) may show higher confusion rates. This is physically meaningful rather than a model failure.
-            </div>
-        </div>
-
-        <div class="metric-card">
-            <h4>3. Per-Class Metrics</h4>
-            
-            <div class="formula">
-                Precision = True Positives / (True Positives + False Positives)
-            </div>
-
-
-            <div class="formula" style="margin-top: 15px;">
-                Recall = True Positives / (True Positives + False Negatives)
-            </div>
-
-
-            <div class="formula" style="margin-top: 15px;">
-                F1-Score = 2 × (Precision × Recall) / (Precision + Recall)
-            </div>
-
-            <ul>
-                <li><strong>Application to our dataset:</strong>
-                    <ul class="nested-list">
-                        <li>Classes with fewer samples (sit, stand) may show lower recall</li>
-                        <li>Common activities (walk, bodyrotate) should show balanced precision/recall</li>
-                        <li>F1-scores reveal which classes need more training data or architectural improvements</li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-    </div>
-
-    <div class="section">
-        <h3>Hyperparameter Optimization Metrics</h3>
-
-        <div class="metric-card">
-            <h4>6. Validation Accuracy During Grid Search</h4>
-            <ul>
-                <li><strong>Grid search parameters:</strong>
-                    <ul class="nested-list">
-                        <li>Learning rate: [1e-4, 3e-4, 1e-3]</li>
-                        <li>Weight decay: [0, 1e-4, 1e-3]</li>
-                        <li>Dropout: [0, 0.1, 0.3]</li>
-                        <li>Batch size: [32, 64, 128]</li>
-                        <li><strong>Total combinations:</strong> 81</li>
-                    </ul>
-                </li>
-                <li><strong>Selection criterion:</strong> Configuration achieving highest validation accuracy after 12 epochs
-                    <div class="explanation">Validation set is used exclusively for this selection to prevent test set leakage. Each configuration is trained from scratch to ensure fair comparison.</div>
-                </li>
-                <li><strong>Reported results:</strong> Best hyperparameters and corresponding validation/test performance
-                    <div class="explanation">This demonstrates the improvement gained through systematic hyperparameter optimization vs using default values.</div>
-                </li>
-            </ul>
-        </div>
-    </div>
 
     <div class="section">
         <h3>Baseline Comparisons</h3>
@@ -642,24 +429,6 @@ For the model itself, we used the exact same CNN as the baseline. After training
 
 <br>
 
-<h2>Preliminary Baseline Results</h2>
-<div style="background: #f9f9f9; padding: 20px; border: 1px solid #ddd; margin: 20px 0;">
-  <p style="color: #666;">[Insert table once you have results]</p>
-  <p><strong>Expected trend:</strong> The baseline CNN should exceed random chance substantially, revealing that spectrogram "textures" are class-informative.</p>
-</div>
-
-<br>
-
-<h2>Architecture Comparison</h2>
-
-
-<br>
-
-<h2>Subject-Generalization Test</h2>
-<strong>caption:</strong> caption
-
-<br><br>
-
 <!-- Qualitative Results -->
 <h3>Qualitative Results</h3>
 Visual examples will include:
@@ -693,7 +462,7 @@ Visual examples will include:
   
 <br><br>
 
-Future improvements include:
+Future improvements may include:
 <ul>
   <li>Running full subject-level generalization tests</li>
   <li>Experimenting with Vision Transformers (ViTs)</li>
@@ -708,6 +477,25 @@ Future improvements include:
 <br><br>
 [2] H Griffiths and C. J. Baker, An introduction to passive radar. Boston: Artech House, 2017.
 
+  
+    <div class="section">
+        <h3>Appendix: Hyperparameter Optimization Grid Search</h3>
+
+        <div class="metric-card">
+            <h4>6. Validation Accuracy During Grid Search</h4>
+            <ul>
+                <li><strong>Grid search parameters:</strong>
+                    <ul class="nested-list">
+                        <li>Learning rate: [1e-4, 3e-4, 1e-3]</li>
+                        <li>Weight decay: [0, 1e-4, 1e-3]</li>
+                        <li>Dropout: [0, 0.1, 0.3]</li>
+                        <li>Batch size: [32, 64, 128]</li>
+                        <li><strong>Total combinations:</strong> 81</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
   
 <br><br>
 <b>Use of Generative AI.</b> The authors disclose that GPT-5.1 was used to assist in this project. All code and analysis was verified by the authors, who take full responsibility for the content.
