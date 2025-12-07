@@ -126,7 +126,7 @@ Camera-based human activity recognition (HAR) has matured, but applying similar 
 
 <h3>Background</h3>
   <br><br>
-Passive radar is used to estimate the distance, direction, and velocity of a target without the active transmission of any RF signal. This is accomplished by taking advantage of other transmitting devices in the area, referred to as illuminators of opportunity, whose RF energy reflects off ("illuminates") the target. Passive radar is always bistatic or multistatic by definition because transmission and reception necessarily occur at different locations, with different devices. Commonly, one receiver channel is dedicated to receiving the direct signal from the illuminator as a timing reference, while one or more additional receiver channels are used to detect targets. We refer to these receivers as the reference and surveillance channels, respectively. Suppression algorithms are used to remove as much of the direct signal from the surveillance channel(s) as possible.
+Passive radar is used to estimate the distance, direction, and velocity of a target without the active transmission of any RF signal. This is accomplished by taking advantage of other transmitting devices in the area, referred to as illuminators of opportunity, whose RF energy reflects off ("illuminates") the target. Passive radar is always bistatic or multistatic by definition because transmission and reception necessarily occur at different locations, with different devices. Commonly, one receiver is dedicated to receiving the direct signal from the illuminator as a timing reference, while one or more separate receivers are used to detect targets. We refer to these receivers as the reference and surveillance channels, respectively. Suppression algorithms are used to remove as much of the direct signal from the surveillance channel(s) as possible.
 
   <br><br>
   To estimate target range, we measure the time delay observed between receiving the direct signal via the reference channel and the reflected paths received by the surveillance channel(s). The reflected path delays are proportional to the total path distance from transmitter to target to receiver, referred to as the bistatic range [2]. However, the achievable range resolution is proportional to the bandwidth of the illuminator. In monostatic (active) pulsed radar, the range resolution is given by c/2B, where c is the speed of light in meters per second and B is the signal bandwidth in Hertz [2]. In bistatic radar, range resolution is generally limited further by certain angles in the bistatic radar geometry [2], but this is beyond the scope of our interest.
@@ -141,18 +141,15 @@ The dataset used in this experiment is OPERAnet [1], a multimodal dataset for HA
 <br><br>
   Significant preprocessing was performed on the raw PWR data prior to the dataset publication. The reference and surveillance signals were correlated to obtain Doppler frequency-shift information with 200 frequency bins of resolution, formatted as a 3 x 200 set of values at each sampling time instant [1]. The recording sample rate was 10 Hz.
   <br><br>
-The creators of OPERAnet chose to exclude relative range data from the dataset due to the limited 40-MHz WiFi signal bandwidth of the 5 GHz band, which provides only 3.75 meters of range resolution [1]. The 5 GHz band was chosen over the 2.4 GHz band, whose 20 MHz bandwidth would have halved the already-limited resolution. It is worth noting that the latest WiFi (802.11ax) standard is capable of up to 160 MHz channel bandwidth, providing a theoretical 0.938 meters of range resolution for potential future investigation.
+We chose to exclude relative range data from the dataset due to the limited 40-MHz WiFi signal bandwidth of the 5 GHz band, which provides only 3.75 meters of range resolution [1]. The 5 GHz band was chosen over the 2.4 GHz band, whose 20 MHz bandwidth would have halved the already-limited resolution. It is worth noting that the latest WiFi (802.11ax) standard is capable of up to 160 MHz channel bandwidth, providing a theoretical 0.938 meters of range resolution for potential future investigation.
 
   <br><br>
-  A total of 38 separate experiment files containing the PWR data were provided in .mat format, including the activity labels, experiment number, person ID and room number. The activities recorded include "background", "bodyrotate", "sit", "stand", "standfromlie", "walk", "liedown", and "noactivity". These labels are stored as string values in the dataset. The label with the shortest total recording duration was "background", at 18.3465 minutes, while the longest was "noactivity" (steady state), at 124.86 minutes [1]. The dataset includes a crowd-counting experiment in which the labels are not human activities, but rather the number of people present in the room. We excluded this experiment file from our pipeline.
+  A total of 38 separate experiment files containing the PWR data were provided in .mat format, including the activity labels, experiment number, person ID and room number. The activities recorded include "background", "bodyrotate", "sit", "stand", "standfromlie", "walk", "liedown", and "noactivity". These labels are stored as string values in the dataset. The label with the shortest total recording duration was "background", at 18.3465 minutes, while the longest was "noactivity" (steady state), at 124.86 minutes [1]. As we will see later, this results in a considerable imbalance that will be corrected in our preprocessing.
 
 
 <!-- Approach -->
-  <h1>Approach</h1>
-  We perform four experiments: activity classification, person identification, cross-room generalization, and the addition of a rejection class for low-confidence predictions.
-  <h2>Experiment 1: Activity Classification: </h2>
 <h3>Preprocessing</h3>
-Our data processing and classification pipeline was implemented in Python on Google Colab. We modified a Python-based visualization script provided with the dataset [1] to convert the Doppler frequency shift data to spectrograms. Since most received power appears in the middle 100 bins, only Doppler bins 50 to 150 were kept. The linear power values are converted to decibel values. With 38 PWR experiments available to us, the output of this stage provided 37 sets of three spectrograms (excluding the crowd-counting experiment), each 100 pixels in height and 10 * N_s pixels in length, where N_s is the length in seconds of the experiment. TODO: add pictures of example spectrograms.
+Our data processing and classification pipeline was implemented in Python on Google Colab. We modified a provided Python-based visualization script provided with the dataset to convert the Doppler frequency shift data to spectrograms. Since most received power appears in the middle 100 bins, only Doppler bins 50 to 150 were kept. The linear power values are converted to decibel values. With 38 PWR experiments available to us, the output of this stage provided 38 sets of three spectrograms, each 100 pixels in height and 10 * N_s pixels in length, where N_s is the length in seconds of the experiment. TODO: add pictures of example spectrograms.
 <br><br>
   <div class="figure-container">
   <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
@@ -162,11 +159,9 @@ Our data processing and classification pipeline was implemented in Python on Goo
 
       </div>
 </div>
-  The first step of our preprocessing pipeline was to split the dataset into training, testing, and validation sets. Rather than achieve an exact percentage split, we split the dataset by experiment file. This ensures that the model is tested solely on data from experiments it has never seen before. However, the experiment durations vary, and while we aimed for an 80%-20%-20% split of experiment files across the training, testing, and validation sets respectively, the true distribution of spectrogram samples is more uneven.  
+  We segment each spectrogram into four-second chunks by scanning over the columns of each spectrogram in steps of 10 pixels and identifying four-second-long windows whose labels are at least 60% the same (at least 24 of the 40 image columns). We do not require 100% of the labels to match one activity because some of them, such as "sit" and "stand", rarely take four seconds to occur. Activities are guarded by brief periods of the "noactivity" label before and after they occur, meaning that the subject is briefly motionless between activities. The output at this stage is thousands of spectrograms, each 100 pixels in height and 40 pixels in width. TODO: Table of label distribution before class balancing (the existing code already produces this info automatically, just need to put it into a nice tabular format.)
   <br><br>
-  We segment each spectrogram into four-second chunks by scanning over the columns of each spectrogram in steps of 10 pixels and identifying four-second-long windows for which at least 30% of the corresponding labels contain an activity other than "noactivity". We do not require 100% of the labels to match one activity because some of them, such as "sit" and "stand", rarely take four seconds to occur. Activities are guarded by brief periods of the "noactivity" label before and after they occur, meaning that the subject is briefly motionless between activities. The output at this stage is thousands of spectrograms, each 100 pixels in height and 40 pixels in width. TODO: Table of label distribution before class balancing (the existing code already produces this info automatically, just need to put it into a nice tabular format.)
-  <br><br>
-With the spectrograms segmented into short, manageable windows for the model, we perform class balancing to uniformly remove samples of overrepresented classes and eliminate certain unwanted classes altogether. The maximum number of spectrograms per class per channel was empirically capped at 2000. As shown in the histogram below (TODO: add histogram, which is also auto-generated by the code), we tolerate a moderate class inbalance but avoid having three to four times as many instances of some classes over others. We removed the "background" class, as data with this label was only available from a single experiment. Thus, we have six classes.
+With the spectrograms segmented into short, manageable windows for the model, we perform class balancing to uniformly remove samples of overrepresented classes and eliminate certain unwanted classes altogether. The maximum number of spectrograms per class per channel was empirically capped at 500. As shown in the histogram below (TODO: add histogram, which is also auto-generated by the code), we tolerate a moderate class inbalance but avoid having three to four times as many instances of some classes over others. We removed the "background" class and, unlike the original study [1], decided to keep the "noactivity" class in the analysis. This is because, in a real deployment, long stretches of "noactivity" are expected when no one is present, and should be classified accordingly. Thus, we have seven classes.
   <div class="figure-container">
   <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
     <img style="height: 500px;" alt="" src="samplesGraphCV.png">
@@ -176,29 +171,162 @@ With the spectrograms segmented into short, manageable windows for the model, we
       </div>
 </div>
   <br><br>
-The final preprocessing step was to convert the string activity labels to integers: '0' for "bodyrotate", '1' for "liedown", and so on, up to 5.
+The final preprocessing step was to convert the string activity labels to integers: '0' for "bodyrotate", '1' for "liedown", and so on, up to 6. The stratified split as follows: 20% for the test set, 20% for the validation set, and 60% for the training set. 
 
 <h2>Baseline Model</h2>
 Our baseline is a standard CNN implemented using PyTorch with four convolutional layers, ReLU activations, maxpooling, batch normalization and a fully connected classifier head. The number of feature map outputs is 16, 32, 64, and 128 for the four layers, respectively. The linear classifier neural network has two fully connected layers with 128 and 7 outputs, respectively.  Our optimizer is Adam, using the cross-entropy loss function. We validated the selection of several hyperparameters, including learning rate, weight decay, dropout, and batch size with a simple, small grid search. This model provides a reference point for later architectural complexity and allows us to replicate the core findings from the OperaNET PWR paper.
 
-  <br><br>
-  TODO: RESULTS of BASELINE go here.
   
   <br><br>
-<h2>Experiment 2: Room Generalization </h2>
- The network must learn spatial–temporal patterns from Doppler spectrogram windows regardless of which room they were recorded in. The generalization question is handled strictly in the data split—training on windows from some rooms and testing on an unseen room—not in the structure of the model itself. In other words, the architecture remains a 4-layer convolutional front-end followed by a dense classifier head with seven outputs, but the training distribution shifts to evaluate environmental robustness rather than requiring any redesign of the network.
-<h3>Approach: MODIFIED model 2</h3>
-  
-A practical challenge emerged immediately: the room number and personID metadata are stored in MATLAB-specific formats that we were unable to parse in our Google CoLab environment. We used MATLAB to export the data in a non-proprietary format before proceeding with our CoLab data processing.
-After resolving metadata loading, spectrograms are normalized, resized to a consistent tensor shape, optionally augmented (noise, small shifts), and split into train/validation/test sets.
 
-<h2>Experiment 3: Person Identification</h2>
+<h3>Approach: MODIFIED model 1 - Test On Never Before Seen Room</h3>
+ The network must learn spatial–temporal patterns from Doppler spectrogram windows regardless of which room they were recorded in. The generalization question is handled strictly in the data split—training on windows from some rooms and testing on an unseen room—not in the structure of the model itself. In other words, the architecture remains a 4-layer convolutional front-end followed by a dense classifier head with seven outputs, but the training distribution shifts to evaluate environmental robustness rather than requiring any redesign of the network.
+  A practical challenge emerged immediately: the room number and personID metadata are stored in MATLAB-specific formats that we were unable to parse in our Google CoLab environment. We used MATLAB to export the data in a non-proprietary format before proceeding with our CoLab data processing.
+After resolving metadata loading, spectrograms are normalized, resized to a consistent tensor shape, optionally augmented (noise, small shifts), and split into train/validation/test sets.
+<p>
+While the baseline experiment demonstrated that CNNs can classify activities from WiFi Doppler spectrograms, it used a random train/test split where the same physical environments (and potentially the same subjects) appeared in both training and testing. This approach, while standard for evaluating general classification performance, does not address a critical real-world deployment question: <strong>Can the model generalize to new physical environments it has never encountered during training?</strong>
+</p>
+
+<p>
+WiFi signal propagation is highly sensitive to environmental factors including room geometry, furniture placement, wall materials, and the presence of other objects that cause multipath reflections. Each room creates a unique "signature" in how WiFi signals scatter and reflect. A model that performs well on data from rooms it has seen during training may struggle when deployed in a new environment where these propagation characteristics differ significantly.
+</p>
+
+<p>
+To test true environmental generalization, we designed an experiment where <strong>all data from Room 2 is held out as a test set</strong>, while the model is trained exclusively on data from all other rooms (Rooms 1, 3, and 4). This "leave-one-room-out" approach provides a realistic assessment of how the model would perform when deployed in a new location, which is essential for practical applications like elderly care monitoring, smart home systems, or security applications where the system must work in diverse environments.
+</p>
+
+<h3>Experimental Design</h3>
+
+<h4>Data Splitting Strategy</h4>
+<p>
+Unlike the baseline experiment which performed a random 60/20/20 split across all data, the room generalization experiment enforces a strict spatial separation:
+</p>
+
+<table class="comparison-table">
+  <thead>
+    <tr>
+      <th>Dataset</th>
+      <th>Source Rooms</th>
+      <th>Number of Experiments</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Training Set</strong></td>
+      <td>Rooms 1, 3, 4</td>
+      <td>31 experiments → 6,340 windows</td>
+      <td>Model learns activity patterns</td>
+    </tr>
+    <tr>
+      <td><strong>Validation Set</strong></td>
+      <td>Rooms 1, 3, 4</td>
+      <td>Same 31 experiments → 1,586 windows (20% split)</td>
+      <td>Hyperparameter tuning, model selection</td>
+    </tr>
+    <tr style="background-color: #fffacd;">
+      <td><strong>Test Set (Room 2)</strong></td>
+      <td><strong>Room 2 ONLY</strong></td>
+      <td>6 experiments → 1,770 windows</td>
+      <td><strong>Evaluate generalization to unseen environment</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="interpretation">
+<strong>Key Design Decision:</strong> The 31 experiments from non-Room-2 environments were first separated, then randomly split 80/20 into training and validation sets. This ensures both training and validation come from the same distribution (rooms 1, 3, 4), while Room 2 represents a completely independent test distribution. This mimics real-world deployment where validation data helps tune the model, but ultimate performance is measured on genuinely new environments.
+</div>
+
+<h4>Preprocessing Differences</h4>
+<p>
+The preprocessing pipeline remained largely identical to the baseline experiment, with one important modification:
+</p>
+
+<ul>
+  <li><strong>Windowing:</strong> Same 4-second windows (40 frames at 10 Hz) with 1-second stride (10 frames)</li>
+  <li><strong>Frequency bins:</strong> Same selection of bins 50-150 (middle 100 bins with highest power)</li>
+  <li><strong>Class balancing:</strong> Applied to training/validation data, capping most classes at 2,000 samples per class</li>
+  <li><strong>Test set handling:</strong> Room 2 test data was NOT balanced—it retains the natural class distribution to reflect realistic deployment conditions</li>
+</ul>
+
+<div class="warning-box">
+<strong>Important Note:</strong> We excluded "noactivity" from this experiment by filtering windows with >70% noactivity labels. This decision was made because:
+<ol style="margin-top: 10px;">
+  <li>The extreme imbalance in noactivity samples (dominating the dataset) made training unstable</li>
+  <li>Our focus was on distinguishing between different <em>active</em> human motions rather than motion vs. stillness</li>
+  <li>This reduced the classification problem to 6 classes: bodyrotate, liedown, sit, stand, standfromlie, and walk</li>
+</ol>
+</div>
+
+<h4>Class Distribution</h4>
+<p>
+After preprocessing and class balancing, the final dataset composition was:
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Class</th>
+      <th>Training/Validation Count</th>
+      <th>Room 2 Test Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>bodyrotate</td>
+      <td>2,000 (balanced)</td>
+      <td>340</td>
+    </tr>
+    <tr>
+      <td>liedown</td>
+      <td>905</td>
+      <td>260</td>
+    </tr>
+    <tr>
+      <td>sit</td>
+      <td>1,070</td>
+      <td>264</td>
+    </tr>
+    <tr>
+      <td>stand</td>
+      <td>1,061</td>
+      <td>283</td>
+    </tr>
+    <tr>
+      <td>standfromlie</td>
+      <td>890</td>
+      <td>265</td>
+    </tr>
+    <tr>
+      <td>walk</td>
+      <td>2,000 (balanced)</td>
+      <td>358</td>
+    </tr>
+    <tr style="font-weight: bold; background-color: #e8f4f8;">
+      <td><strong>Total</strong></td>
+      <td><strong>7,926</strong></td>
+      <td><strong>1,770</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+  
+  <div class="figure-container">
+  <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
+    <img style="height: 500px;" alt="" src="sa.png">
+  </div>
+  <div class="caption">
+    
+      </div>
+  <h3>Approach: MODIFIED model 2</h3>
+  
+<h3>Approach: MODIFIED model 2 - Distinguish between different people</h3>
 
 One interesting question we had was this: if a PWR can be used to accurately distinguish between different types of activity, could it also be used to distinguish between different people? This model was almost identical to the baseline in terms of methodology. The main difference was that instead of using activity labels, we trained the model with the personID labels. The people in the experiments were simply labeled with strings from “One” to “Seven.” In the preprocessing, we excluded experiment_028, since that one has a slightly different methodology and doesn’t include accurate personID. Unlike the baseline model, we also increased the maximum samples per class to 1400, which can be seen in the image below. 
 
   <div class="figure-container">
   <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
-    <img style="height: 500px;" alt="" src="personIDclassdist.png">
+    <img style="height: 500px;" alt="" src="class_dist_room_experiment.png">
   </div>
   <div class="caption">
     
