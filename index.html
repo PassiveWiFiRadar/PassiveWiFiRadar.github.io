@@ -92,7 +92,7 @@ th {
 </div>
 
 <!-- Abstract -->
-<h3>Abstract</h3>
+<h1>Abstract</h1>
 Wireless sensing offers a privacy-preserving alternative to camera-based computer vision, yet datasets from passive WiFi radar (PWR) systems remain underexplored in vision contexts. In this project, Doppler spectrograms derived from WiFi reflections are treated as three-channel images and analyzed using convolutional neural networks (CNNs) for human activity recognition. We develop a training pipeline for OperaNET Doppler data, run baseline human activity classification, and explore some variations of this problem. Results indicate that a simple CNN can meaningfully classify activities from non-visual RF data with accuracy generally exceeding 70% for five of six classes of human activity.
 
 <br><br>
@@ -111,7 +111,7 @@ Wireless sensing offers a privacy-preserving alternative to camera-based compute
 <br><br>
 
 <!-- Introduction -->
-<h3>Introduction</h3>
+<h1>Introduction</h1>
 Computer vision techniques are not limited to processing camera data, nor is camera deployment always feasible in areas where privacy is of concern, or when opaque objects may block views. It is implied but not often discussed in computer vision courses that image processing techniques may be applied to any 2D signal representation, including spectrograms from wireless signals. By representing signals as images, we can process them with convolutional neural networks (CNNs) and similar computer vision techniques similarly to images from a camera. Wireless sensing offers a promising approach to detecting various features about the environment in situations where cameras may not be appropriate, such as in private homes.
   <br><br>
   Wireless sensing is a very broad field, but our interests are constrained to everyday wireless signals--specifically WiFi. Although WiFi is not designed for integrated sensing and communication, it remains a convenient choice for certain sensing applications because of its ubiquity when compared to expensive, specialized radio hardware.
@@ -130,8 +130,7 @@ The goal of this project is to explore the use of WiFi as a unique form of compu
 The remainder of this report is structured as follows: a brief background on passive radar fundamentals is provided, followed by a detailed description of the dataset used in this project. We then present our baseline CNN and data processing pipeline. Four experiments are explored: basic activity classification, cross-room generalization, person identification, and the addition of a rejection class for low-confidence predictions.
 <br><br>
 
-<h3>Background</h3>
-  <br><br>
+<h1>Background</h1>
 Passive radar is used to estimate the distance, direction, and velocity of a target without the active transmission of any RF signal. This is accomplished by taking advantage of other transmitting devices in the area--illuminators of opportunity--whose RF energy reflects off ("illuminates") the target. Passive radar is always bistatic or multistatic by definition because transmission and reception necessarily occur at different locations, with different devices. Commonly, one receiver channel is dedicated to receiving the direct signal from the illuminator as a timing reference, while one or more additional receiver channels are used to detect targets. We refer to these receivers as the reference and surveillance channels, respectively. Suppression algorithms are used to remove as much of the direct signal from the surveillance channel(s) as possible.
 
   <br><br>
@@ -141,7 +140,7 @@ Passive radar is used to estimate the distance, direction, and velocity of a tar
 <br><br>
 The Doppler shift detected by passive radar may be represented as a spectrogram image, which can then be processed with computer vision techniques. Typically, the horizontal axis of the spectrogram represents time and the vertical axis represents the discrete Doppler frequency bins. Pixel intensity is proportional to the power of the received signal at the given Doppler shift. Each surveillance channel produces its own spectrogram. The reference channel only exists as a reference and is not directly used for detecting targets.
 
-<h2>The Dataset</h2>
+<h1>The Dataset</h1>
 The dataset used in this experiment is OPERAnet [1], a multimodal dataset for HAR. Although the dataset includes WiFi CSI, Ultra-Wideband, and Microsoft X-box Kinect sensor data, our interest lies in the passive WiFi radar data subset. The hardware setup employed in [1] to capture the PWR data involves a USRP-2945 as a four-channel passive receiver with directional antennas. The first channel is used as the reference channel, recording the signal of opportunity; the remaining three are surveillance channels. The study used an Intel NUC device to create the signal of opportunity, although any stationary WiFi transmitter could be used. Refer to [1] for details regarding room layout and antenna placement.
 
 <br><br>
@@ -331,7 +330,7 @@ Unlike the baseline experiment which performed a random 60/20/20 split across al
     The final dataset composition after preprocessing and class balancing
     </div>
     <h2>Experiment 2 Results</h2>
-  </div>
+
     <div class="figure-container">
   <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
     <img style="height: 500px;" alt="" src="training_matrix.png">
@@ -472,14 +471,14 @@ Future improvements may include:
 <br><br>
 
 <!-- References -->
-<h3>References</h3>
+<h2>References</h2>
 [1] M. J. Bocus, "A Comprehensive Multimodal Activity Recognition Dataset Acquired from Radio Frequency and Vision-Based Sensors". figshare, 01-Aug-2022. doi: 10.6084/m9.figshare.c.5551209.v1.
 <br><br>
 [2] H Griffiths and C. J. Baker, An introduction to passive radar. Boston: Artech House, 2017.
 
   
     <div class="section">
-        <h3>Appendix: Hyperparameter Optimization Grid Search</h3>
+        <h2>Appendix: Hyperparameter Optimization Grid Search</h2>
 
         <div class="metric-card">
             <h4>6. Validation Accuracy During Grid Search</h4>
