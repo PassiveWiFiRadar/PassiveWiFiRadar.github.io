@@ -395,32 +395,54 @@ These scores are consistent with the baseline model. The F1 scores closely follo
 
 <h1>Experiment 3: Person Identification</h1>
 
-One interesting question we had was this: if a PWR can be used to accurately distinguish between different types of activity, could it also be used to distinguish between different people? This model was almost identical to the baseline in terms of methodology. The main difference was that instead of using activity labels, we trained the model with the personID labels. The people in the experiments were simply labeled with strings from “One” to “Six.” Unlike the baseline model, we also reduced the maximum samples per class to 1400 for stricter class balancing, which can be seen in the image below. 
+One interesting question we had was this: if a PWR can be used to accurately distinguish between different types of activity, could it also be used to distinguish between different people? This model was almost identical to the baseline in terms of methodology. The main difference was that instead of using activity labels, we trained the model with the personID labels. The people in the experiments were simply labeled with strings from “One” to “Six.” Unlike the baseline model, we also reduced the maximum samples per class to 1400 for stricter class balancing, which can be seen in the image below.
 
   <div class="figure-container">
   <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
     <img style="height: 500px;" alt="" src="personIDclassdist.png">
   </div>
   <div class="caption">
-    
+  Class distribution for personID model, all activity types included
       </div>
 </div>
 <h2>Experiment 3 Results</h2>
-For the model itself, we used the exact same CNN as the baseline. After training, we evaluated the accuracy on the test loader to be 74.18%. However, this result comes with an enormous qualification: to achieve this, we perform a stratified train-test-validation split of 60%/20%/20% across all experiments. This is quite different from the baseline, where experiments from the test set were excluded from the training set. The resulting leakage inflates our test accuracy.
+For the model itself, we used the exact same CNN as the baseline. After training, we evaluated the accuracy on the test loader to be 74.18%. However, this result comes with an enormous qualification: to achieve this, we perform a stratified train-test-validation split of 60%/20%/20% across all experiments. This is quite different from the baseline, where experiments from the test set were excluded from the training set. 
 
   <div class="figure-container">
   <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
     <img style="height: 500px;" alt="" src="personIDconfusion.png">
   </div>
   <div class="caption">
-
+  Confusion matrix for personID model, with data leak
       </div>
 </div>
 
+Upon reflection, it was quite clear that the data leakage was artificially inflating our testing accuracy. In other words, the model wasn’t learning how to recognize people, it was just learning how to distinguish between the different experiments. We attempted to separate the sets by experiment and found that, despite attempts at regularization, training accuracy often exceeded 98% while test accuracy often was around 20% (random guessing). In an effort to improve this, we removed any spectrogram window that was greater than 30% “noactivity,” since obviously that model won’t be able to identify a person if there is no person there to identify. This didn’t offer any improvements, so we removed all spectrograms from the dataset other than "walk" samples, under the presumption that walking is more unique to each individual than any of the other classes. See the class distribution below. Clearly, there were far fewer datapoints for the “walk” activity than for the baseline. 
+
+  <div class="figure-container">
+  <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
+    <img style="height: 500px;" alt="" src="personIDclassdist_walk.png">
+  </div>
+  <div class="caption">
+  Class Distribution for "walk" activity only
+      </div>
+</div>
   
 <br><br>
 
-We attempted to separate the sets by experiment and found that, despite attempts at regularization, training accuracy often exceeded 98% while test accuracy often was on the order of 20% (random guessing). As each experiment contains only one unique person, we suspect that the model was memorizing experiments rather than learning individual human signatures. We also attempted removing all spectrograms from the dataset other than "walk" samples, under the presumption that walking is more unique to each individual than any of the other classes. However, this had a minimal impact on results.
+However, this also had a minimal impact on results. Our conclusion was that PWR data is insufficient to adequately distinguish between different people. As you may notice in the confusion matrix below, we also couldn’t include person 4 in the test set, since there was only one experiment that included them walking. We considered splitting the experiment, but then we would likely have the same issue with data leakage as before and it would just recognize person 4 based on the experiment. If we were to further expand on this experiment, it would probably be necessary to create a much more expansive dataset particularly suited for this purpose.
+
+  <div class="figure-container">
+  <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
+    <img style="height: 500px;" alt="" src="personIDconfusion_walk.png">
+  </div>
+  <div class="caption">
+  Confusion matrix for personID model, "walk" activity only
+      </div>
+</div>
+
+
+  
 <br>
 
 <!-- Qualitative Results -->
@@ -436,6 +458,17 @@ Below is a snapshot of spectrograms from the test set of the baseline model (Exp
   </div>
 </div>
 
+Below is a snapshot of spectrograms from the test set of the personID model (Experiment 3). Unlike the baseline model, the differences between the spectrograms are much less substantial, and this clarifies as to why the model was not able to perform.
+
+  <div class="figure-container">
+  <div style="background: #f0f0f0; padding: 40px; border: 1px solid #ddd;">
+    <img style="height: 500px;" alt="" src="personID_freq.png">
+  </div>
+  <div class="caption">
+  Spectrogram Snapshot from the PersonID model (Experiment 3)
+      </div>
+</div>
+  
 <br><br>
 
 <!-- Conclusion -->
